@@ -1,0 +1,12 @@
+default:
+ betaFileName: "f:/roeder/methylation_transposed2.csv"
+ MultiModProbesFileName: "y:/Gruppen/immu/Epigenetik/450k/MultiModalCpG.csv"
+ nonVariableProbesFileName: "f:/roeder/nonVariableProbes.RDS" #"f:/roeder/nonVariableProbes.csv"
+ EWAScatalogFileName: "ewascatalog-results.txt/results.txt"
+ baseURL_EWASDataHub: "https://bigd.big.ac.cn/ewas/datahub/probe/"
+ baseURL_MRCEWASCatalog: "http://ewascatalog.org/?query="
+ mergeAttribut: "ID_Kind"
+ genderAttribut: "gender"
+ genderFemaleValue: "w"
+ genderMaleValue: "m"
+ debugMode: TRUE
