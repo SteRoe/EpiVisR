@@ -10,13 +10,13 @@ plotManhattanVolcano_UI <- function(id){
     bsCollapse(id = "collapsePlot", open = c("plot"), multiple = TRUE,
           bsCollapsePanel("plot", label = "Select Probe",
             fluidRow(
-              column(10,
+#              column(10,
               sliderInput(ns("numberResults"),"top n of results",
                           10, 1000, 1000, 1, width = "100%")
-              ),
-              column(2, style = "margin-top: 25px;",
-                shiny::actionButton(ns("btnPlot"), label = "Update # of Probes")
-              )
+#              )
+              # column(2, style = "margin-top: 25px;",
+              #   shiny::actionButton(ns("btnPlot"), label = "Update # of Probes")
+              # )
             ),
             tabsetPanel(
               tabPanel("Visualisation",
@@ -57,7 +57,7 @@ plotManhattanVolcano_UI <- function(id){
 
 plotManhattanVolcano_SERVER <- function(id, sessionVariables) {
   moduleServer(id, function(input, output, session) {
-    moduleVariables <- reactiveValues(df = data.frame())
+#    moduleVariables <- reactiveValues(df = data.frame())
     #update sliderInput
     updateSliderInput(
       session = session,
@@ -65,7 +65,38 @@ plotManhattanVolcano_SERVER <- function(id, sessionVariables) {
       max = nrow(sessionVariables$resultDataSingleTrait),
       value = min(250,nrow(sessionVariables$resultDataSingleTrait))
     )
-    plotManhattanVolcano(input, output, sessionVariables, moduleVariables)
+    reDFManhattanVolcano <- reactive({getDFforManhattanVolcano(sessionVariables, input$numberResults)})    
+
+    output$plotManhattan <- plotly::renderPlotly(plotlyManhattanVolcano(reDFManhattanVolcano(),"M"))
+    output$plotVolcano <- plotly::renderPlotly(plotlyManhattanVolcano(reDFManhattanVolcano(),"V"))
+    
+    output$dt <- DT::renderDataTable({
+      id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(removeNotification(id), add = TRUE)
+      tryCatch({
+        message(paste0(Sys.time(), " render data table Manhattan/ volcano."))
+        DT::datatable(reDFManhattanVolcano(), escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
+                      options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+      }, errror = function(err) {
+        validate(need(nrow(df>0,"No data to show")))
+      })
+    }, server = FALSE)
+
+    output$DTGeneSymbolOut <- DT::renderDataTable(server=FALSE,{
+      id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(removeNotification(id), add = TRUE)
+      tryCatch({
+        # Load data
+        data <- getDFforPathwayAnalysis(reDFManhattanVolcano())
+        # Show data
+        message(paste0(Sys.time(), " render data table pathway."))
+        DT::datatable(data, extensions = 'Buttons', height = 400,
+                      options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE, 
+                                     ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+      }, errror = function(err) {
+        validate(need(nrow(df>0,"No data to show")))
+      })
+    })
     
     observeEvent(event_data("plotly_click", source = "plotlyManhattan"), suspended = FALSE, {
       sessionVariables$probe$probe <- event_data("plotly_click", source = "plotlyManhattan")$key
@@ -75,7 +106,8 @@ plotManhattanVolcano_SERVER <- function(id, sessionVariables) {
     }, ignoreNULL = FALSE)
     
     observeEvent(input$dt_cell_clicked, {
-      df = moduleVariables$df
+#      df = moduleVariables$df
+      df = reDFManhattanVolcano()
       selected = input$dt_rows_selected
       if (length(selected)) {
         selectedProbeIDs <- df[selected,]$probeID
@@ -86,62 +118,20 @@ plotManhattanVolcano_SERVER <- function(id, sessionVariables) {
       }
     })
     
-    observeEvent(input$btnPlot, ignoreInit = FALSE, {
-      plotManhattanVolcano(input, output, sessionVariables, moduleVariables)
-    }, ignoreNULL = FALSE)
   })
 }
 
-plotManhattanVolcano <- function (input, output, sessionVariables, moduleVariables) {
-  output$trait <- renderText(sessionVariables$trait$trait)
+getDFforManhattanVolcano <- function(sessionVariables, n) {
   df <- sessionVariables$resultDataSingleTrait
-  df = df[order(df$P_VAL,),]
-  moduleVariables$df = df
-  df <- df %>% slice_min(P_VAL, n = input$numberResults)
+  df <- df[order(df$P_VAL,decreasing=FALSE)]
+  df <- df[1:n,]
   df <- resultDataSingleScenarioWithAnnotation(df)
   df <- resultDataSingleScenarioWithAnnotationEWAScatalogCount(df)
-  output$plotManhattan <- plotly::renderPlotly(plotlyManhattanVolcano(df,"M"))
-  output$plotVolcano <- plotly::renderPlotly(plotlyManhattanVolcano(df,"V"))
-  
-  output$dt <- DT::renderDataTable({
-    id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
-    on.exit(removeNotification(id), add = TRUE)
-    tryCatch({
-    DT::datatable(df, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
-              options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
-    }, errror = function(err) {
-      validate(need(nrow(df>0,"No data to show")))
-    })
-  }, server = FALSE)
-  output$DTGeneSymbolOut <- DT::renderDataTable(server=FALSE,{
-    id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
-    on.exit(removeNotification(id), add = TRUE)
-    tryCatch({
-    # Load data
-      data <- getDFforPathwayAnalysis(df)
-      # Show data
-      datatable(data, extensions = 'Buttons', height = 400,
-                options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE, 
-                               ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
-    }, errror = function(err) {
-      validate(need(nrow(df>0,"No data to show")))
-    })
-  })
-  # gene.symbol <- extractGeneSymbols(df)
-  # entrezID <- extractEntrezID(gene.symbol)
-  # KEGGID <- extractKEGGID(entrezID)
-  
-  #      output$txtPathway <- renderText(t)
-  #      output$vtxtPathway <- renderText(t)
-  
-  # output$txtGeneSymbol <- renderText(gene.symbol)
-  # output$txtEntrezGeneID <- renderText(entrezID)
-  # output$txtKEGGID <-renderText(KEGGID)
 }
 
 plotlyManhattanVolcano <- function(DF, M_V) {
   tryCatch({
-    #browser()
+    message(paste0(Sys.time(), " plot manhattan / volcano."))
     if(missing(M_V)) M_V = "V"
     colors = colorRampPalette(brewer.pal(12,'Paired'))
     plot = plot_ly(data = DF, source = "plotlyManhattan")
@@ -172,14 +162,8 @@ plotlyManhattanVolcano <- function(DF, M_V) {
                              yaxis = list(type = "log", autorange = "reversed"))
     }
     return (plot)
-    #    event_register("plotlyManhattan", 'plotly_click')
-    # d <- event_data("plotly_click", source = "plotlyManhattan")
-    # #if (is.null(d)) "Click events appear here (double-click to clear)" else d
-    # if (!is.null(d)) {
-    #   browser()     
-    # }
   }, error=function(err){
-    print(paste0("unable to print manhattan plot; ", err$message))
+    print(paste0(Sys.time(), " unable to print manhattan plot; ", err$message))
     return(empty_plot(err$message))
   })
   

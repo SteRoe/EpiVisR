@@ -127,7 +127,7 @@ getTraits<-function(directory){
       #  testthat::expect_equal(length(column), 1)
   
       fileNames=list()
-      temp <- list.files(path=directory,pattern="*.csv")
+      temp <- list.files(path=directory,pattern="\\.csv$")
       for (i in 1:length(temp)) {
         firstlines <- read.table(file = paste0(directory,as.character(temp[i])), sep="\t", header = T, nrows = 5)
         if (colnames(firstlines)[1] == "probeID") {
@@ -156,7 +156,7 @@ getTraitsWithSummary <- function(directory){
     tr = traits
     message(paste0(Sys.time(), " start loading folder"))
     tryCatch({
-      temp <- list.files(path=directory,pattern="*.csv")
+      temp <- list.files(path=directory,pattern="\\.csv$")
     }, error=function(err){
       print(paste0("unable to load '",directory,"'"))
     });
@@ -171,7 +171,7 @@ getTraitsWithSummary <- function(directory){
       RDSfileName = paste0(directory,fileNameTraitsSummary)
       if (file_test("-f", RDSfileName) == TRUE) {
         
-        message(paste0(Sys.time(), " reading RDS", RDSfileName))
+        message(paste0(Sys.time(), " reading RDS ", RDSfileName))
         traits = readRDS (file = RDSfileName)
       }
       else {
@@ -185,12 +185,12 @@ getTraitsWithSummary <- function(directory){
                 tr$trait = fileName
                 fileName <- paste0(directory,fileName,".csv")
                 message(paste0(Sys.time(), " reading trait file ", fileName))
-                if (deepDebugMode == TRUE) {
-                  all.results <- fread(fileName, stringsAsFactors = FALSE, header = TRUE, sep = "\t", nrows = 1000)
-                }
-                else {
+                # if (deepDebugMode == TRUE) {
+                #   all.results <- fread(fileName, stringsAsFactors = FALSE, header = TRUE, sep = "\t", nrows = 1000)
+                # }
+                # else {
                   all.results <- fread(fileName, stringsAsFactors = FALSE, header = TRUE, sep = "\t")
-                }
+                # }
                 all.results = all.results[order(all.results$N,decreasing = TRUE),]
                 tr$MaxN = all.results$N[1]
                 all.results = all.results[order(all.results$P_VAL),]
@@ -238,7 +238,7 @@ getTraitsWithSummary <- function(directory){
         traits <- traits[-c(1), ]
         #save DF for faster later access
         if (debugMode == FALSE) {
-          message(paste0(Sys.time(), "writing RDS", RDSfileName))
+          message(paste0(Sys.time(), "writing RDS ", RDSfileName))
           saveRDS(traits, file = RDSfileName)
         }
       }

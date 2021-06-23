@@ -1,53 +1,56 @@
+#' installLibraries
+#' installs necessary libraries if needed
+#' @examples installLibraries()
 installLibraries <- function() {
-  if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager", lib = libDir)
-  if (!requireNamespace("biomaRt", quietly = TRUE))
-    BiocManager::install("biomaRt", lib = libDir)
-  if (!requireNamespace("GOSim", quietly = TRUE))
-    BiocManager::install("GOSim", lib = libDir)
-  if (!requireNamespace("DOSE", quietly = TRUE))
-    BiocManager::install("DOSE", lib = libDir)
-  if (!requireNamespace("org.Hs.eg.db", quietly = TRUE))
-    BiocManager::install("org.Hs.eg.db", lib = libDir)
-  if (!requireNamespace("pathfindR", quietly = TRUE))
-    BiocManager::install("pathfindR", lib = libDir)
-  if (!requireNamespace("RCy3", quietly = TRUE))
-    BiocManager::install("RCy3", lib = libDir)
+#   if (!requireNamespace("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager", lib = libDir)
+#   if (!requireNamespace("biomaRt", quietly = TRUE))
+#    BiocManager::install("biomaRt", lib = libDir)
+#   if (!requireNamespace("GOSim", quietly = TRUE))
+#     BiocManager::install("GOSim", lib = libDir)
+#   if (!requireNamespace("DOSE", quietly = TRUE))
+#     BiocManager::install("DOSE", lib = libDir)
+#   if (!requireNamespace("org.Hs.eg.db", quietly = TRUE))
+#     BiocManager::install("org.Hs.eg.db", lib = libDir)
+#   if (!requireNamespace("pathfindR", quietly = TRUE))
+#     BiocManager::install("pathfindR", lib = libDir)
+#   if (!requireNamespace("RCy3", quietly = TRUE))
+#     BiocManager::install("RCy3", lib = libDir)
 
   if (!requireNamespace("shiny", quietly = TRUE))
     install.packages("shiny", lib = libDir)
   
-  if (!requireNamespace("shinyFiles", quietly = TRUE))
-    install.packages("shinyFiles", lib = libDir)
+#   if (!requireNamespace("shinyFiles", quietly = TRUE))
+#     install.packages("shinyFiles", lib = libDir)
   
   if (!requireNamespace("plotly", quietly = TRUE))
     install.packages("plotly", lib = libDir)
   if (!requireNamespace("DT", quietly = TRUE))
     install.packages("DT", lib = libDir)
   if (!requireNamespace("meffil", quietly = TRUE)) {
-    install.packages("devtools") # if the devtools package is not installed
-    library(devtools)
-    install_github("perishky/meffil", lib = libDir)
+  install.packages("devtools") # if the devtools package is not installed
+  library(devtools)
+  install_github("perishky/meffil", lib = libDir)
     #install.packages("meffil")
   }
   #install_version("foobarbaz", "0.1.2")
-  if (!requireNamespace("ggforce", quietly = TRUE))
-    install.packages("ggforce", lib = libDir)
+#   if (!requireNamespace("ggforce", quietly = TRUE))
+#     install.packages("ggforce", lib = libDir)
   if (!requireNamespace("foreach", quietly = TRUE))
     install.packages("foreach", lib = libDir)
   if (!requireNamespace("psych", quietly = TRUE))
     install.packages("psych", lib = libDir)
   if (!requireNamespace("tidyverse", quietly = TRUE))
     install.packages("tidyverse", lib = libDir)
-  if (!requireNamespace("crosstalk", quietly = TRUE))
-    install.packages("crosstalk", lib = libDir)
-  if (!requireNamespace("reactable", quietly = TRUE))
-    install.packages("reactable", lib = libDir)
-  if (!requireNamespace("ggExtra", quietly = TRUE))
-    install.packages("ggExtra", lib = libDir)
+#   if (!requireNamespace("crosstalk", quietly = TRUE))
+#     install.packages("crosstalk", lib = libDir)
+#   if (!requireNamespace("reactable", quietly = TRUE))
+#     install.packages("reactable", lib = libDir)
+#   if (!requireNamespace("ggExtra", quietly = TRUE))
+#     install.packages("ggExtra", lib = libDir)
   # if (!requireNamespace("heatmaply", quietly = TRUE))
   #   install.packages("heatmaply", lib = libDir)
-  library(devtools)
+  # library(devtools)
   # if (!requireNamespace("ComplexHeatmap", quietly = TRUE))
   #   install_github("jokergoo/ComplexHeatmap", lib = libDir)
   # if (!requireNamespace("InteractiveComplexHeatmap", quietly = TRUE))
@@ -57,14 +60,17 @@ installLibraries <- function() {
   #   install.packages("magick", lib = libDir)
   # if (!requireNamespace("fastcluster", quietly = TRUE))
   #   install.packages("fastcluster", lib = libDir)
-  if (!requireNamespace("shinyBS", quietly = TRUE))
-    install.packages("shinyBS", lib = libDir)
-  if (!requireNamespace("reactlog", quietly = TRUE))
-    install.packages("reactlog", lib = libDir)
-  if (!requireNamespace("config", quietly = TRUE))
-    install.packages("config", lib = libDir)
+  # if (!requireNamespace("shinyBS", quietly = TRUE))
+  #   install.packages("shinyBS", lib = libDir)
+  # if (!requireNamespace("reactlog", quietly = TRUE))
+  #   install.packages("reactlog", lib = libDir)
+  # if (!requireNamespace("config", quietly = TRUE))
+  #   install.packages("config", lib = libDir)
 }
 
+#' loadLibraries
+#' loads necessary libraries if needed
+#' @examples loadLibraries()
 loadLibraries <- function(){
   # library(remotes)
   # library(GOSim)
@@ -75,8 +81,8 @@ loadLibraries <- function(){
   library(shiny)
   #library(shinyFiles)
   library(DT)
-  library(ggplot2)
-  library(ggExtra) # for ggMarginal
+#   library(ggplot2)
+#   library(ggExtra) # for ggMarginal
   #library(Cairo)   # For nicer ggplot2 output when deployed on Linux
   library(data.table)
   library(meffil)
@@ -101,6 +107,9 @@ loadLibraries <- function(){
   library(config)
 }
 
+#' checkConfigVariables
+#' check, whether needed connfig variables are set
+#' @examples checkConfigVariables()
 checkConfigVariables <- function() {
 #  browser()
   # if (is_null(config$errorTest)) {
@@ -180,7 +189,6 @@ getTraitsDFLong <- function(sessionVariables) {
       PHENO<-P1
       firstPHENOVar <- config$firstPHENOVar + ncol(P) - 1
       lastPHENOVar <- config$lastPHENOVar + ncol(P) - 1
-#      PHENO = addXToName(PHENO,firstPHENOVar,lastPHENOVar)
 #      PHENOWinsorized = winsorize(PHENO,0.1,firstPHENOVar,lastPHENOVar)
 #browser()
       PHENOWinsorized = winsorize(PHENO,config$winsorTrim,firstPHENOVar,lastPHENOVar)
@@ -195,53 +203,56 @@ getTraitsDFLong <- function(sessionVariables) {
   }
 }
 
+#' loadObjects
+#' loads globally needed objects (methylation matrix with beta values, annotation)
+#' @examples loadObjects()
 loadObjects <- function(){
-#browser()
   if (dir.exists(dataDir)) {
-  #   PHENO <- getTraitsDFLong(dataDir)
-  # 
-  #   assign("PHENO",PHENO,envir=globalenv())
-  # #  typeof(PHENO[15,15])
-  #   
-  #   PHENOFull<-PHENO
-  #   assign("PHENOFull",PHENOFull,envir=globalenv())
-  #   
     #load list of multimodal CpG
+    
+    message(paste0(Sys.time(), " load beta."))
+    betaFileName <- config$betaFileName
+    beta <- fread(betaFileName,stringsAsFactors=FALSE,header=TRUE,sep="\t")
+    beta <- as.data.frame(beta)
+#    beta<-data.frame(column_to_rownames(beta, var = "PROBEID"))
+    rownames(beta) <- beta$PROBEID
+    beta$PROBEID <- NULL
+    # message(paste0(Sys.time(), " remove outliers from beta."))
+    # beta_wo_outliers<-removeOutliers3IQR(as.matrix(beta))
+    # beta_wo_outliers<-as.data.frame(beta_wo_outliers[[1]])
+    # beta<-beta_wo_outliers
+    message(paste0(Sys.time(), " load multimodal probes."))
     MultiModProbesFileName <- config$MultiModProbesFileName
-    #MultiModCpG<-fread(file="y:/Gruppen/immu/Epigenetik/450k/MultiModalCpG.csv",sep="\t",dec=".")
     MultiModProbes<-fread(file=MultiModProbesFileName,sep="\t",dec=".")
     assign("MultiModProbes",MultiModProbes,envir=globalenv())
-    
-    betaFileName <- config$betaFileName
-    #beta <- fread("f:/roeder/methylation_transposed2.csv",stringsAsFactors=FALSE,header=TRUE,sep="\t")
-    beta <- fread(betaFileName,stringsAsFactors=FALSE,header=TRUE,sep="\t")
-    
-    beta<-data.frame(column_to_rownames(beta, var = "PROBEID"))
-    #beta<-as.data.table(beta)
-    
-    beta_wo_outliers<-removeOutliers3IQR(as.matrix(beta))
-    beta_wo_outliers<-as.data.frame(beta_wo_outliers[[1]])
-    beta<-beta_wo_outliers
-#browser()
     beta <- removeMultiModelCpGFromBeta(beta,MultiModProbes)
 
-    nonVariableProbesFileName <- config$nonVariableProbesFileName
-#    nonVariableProbes <- fread(file = nonVariableProbesFileName,sep = "\t",dec = ".")
-#    nonVariableProbes <- readRDS(file="f:/roeder/nonVariableProbes.RDS")
-    nonVariableProbes <- readRDS(file = nonVariableProbesFileName)
-    assign("nonVariableProbes",nonVariableProbes,envir=globalenv())
-    beta <- removeNonVariableProbes(beta,nonVariableProbes)
+    # message(paste0(Sys.time(), " loading non-variable probeIDs."))
+    # nonVariableProbesFileName <- config$nonVariableProbesFileName
+    # nonVariableProbes <- fread(file = nonVariableProbesFileName,sep = "\t",dec = ".")
+    # nonVariableProbes <- readRDS(file = nonVariableProbesFileName)
+    # assign("nonVariableProbes",nonVariableProbes,envir=globalenv())
+    # message(paste0(Sys.time(), " removing non-variable probeIDs."))
+    # beta <- removeNonVariableProbes(beta,nonVariableProbes)
 
     assign("beta",beta,envir=globalenv())
+    message(paste0(Sys.time(), " transposing beta."))
     beta.t<-t(beta)
+    rownames(beta)
+    colnames(beta)
+    colnames(beta.t) <- rownames(beta)
+    colnames(beta.t)
+    rownames(beta.t)
     assign("beta.t",beta.t,envir=globalenv())
     
+    message(paste0(Sys.time(), " load annotation."))
     annotation <- meffil.get.features("450k")
     annotation$relation.to.island = as.factor(annotation$relation.to.island)
     #remove unmeasured or multimodal probeIDs from annotation 
     annotation = annotation[which(annotation$name %in% rownames(beta)),]
     assign("annotation",annotation,envir=globalenv())
     
+    message(paste0(Sys.time(), " load EWAS catalog."))
     EWAScatalogFileName <- config$EWAScatalogFileName
     EWAScatalog = fread(file=paste0(appDir,EWAScatalogFileName), sep = "\t")
     assign("EWAScatalog",EWAScatalog,envir=globalenv())
@@ -259,28 +270,17 @@ resetSciPen<-function(){
   options(scipen=0, digits=7)
 }
 
-# addXToName <- function(traitDF,firstPHENOVar,lastPHENOVar) {
-# #browser()
-#   foreach(i = firstPHENOVar:lastPHENOVar, .combine = cbind, .verbose=FALSE) %do% {
-#     tryCatch({
-# #browser()
-#       if (!is.na(as.numeric(colnames(traitDF)[i]))) { #check whether name is numeric only
-#         colnames(traitDF)[i] = paste0("X",colnames(traitDF)[i])
-#       }
-#     }, warning=function(warn){
-#        #catch unwanted warning messages
-# #      print(paste0("Warning: ", warn$message))
-#     }, error=function(err){
-# #browser()
-#       print(paste0("Error: ", err$message))
-#     })
-#   }
-#   return (traitDF)
-# }
-  
-winsorize <- function(traitDF,trim,firstPHENOVar,lastPHENOVar) {
+#' winsorize
+#' performs winsorizing 
+#' @param traitDF data.frame to be used
+#' @param trim value to be used for winsorizing
+#' @param startVar variable to start with
+#' @param endVar variable to end at
+#' @return data.frame with winsorized variables
+#' @examples winsorize(df, 0.05, 10, 20)
+winsorize <- function(traitDF, trim, startVar, endVar) {
   #winsorize ScenarioDF
-  foreach(i = firstPHENOVar:lastPHENOVar, .combine = cbind, .verbose=FALSE) %do% {
+  foreach(i = startVar:endVar, .combine = cbind, .verbose=FALSE) %do% {
     tryCatch({
       traitDF[,i]<-winsor(traitDF[,i],trim)
     }, error=function(err){
@@ -291,6 +291,7 @@ winsorize <- function(traitDF,trim,firstPHENOVar,lastPHENOVar) {
   return (traitDF)
 }
 
+#weiter: check, whether furthermore needed
 getGoTerms <- function(geneSymbols) {
   if (!is_empty(geneSymbols)) {
     # also look for "DOSE" database from slides 21.4. 17:35 to find affected diseases on the general levelBiocManager::install("GOSim")
@@ -315,11 +316,10 @@ getGoTerms <- function(geneSymbols) {
 }
 
 traitDF <- function(sessionVariables) {
+#traitDF <- function(trait) {
   trait = sessionVariables$trait$trait
   return (sessionVariables$traitsDFLong[,c("ID_Kind", "gender", trait)])
 }
-
-
 
 geneSymbols <- function(currentProbeID) {
   geneSymbols = str_split (annotation[annotation$name == currentProbeID,]$gene.symbol, " ")
@@ -327,13 +327,17 @@ geneSymbols <- function(currentProbeID) {
   return (geneSymbols)
 }
 
+#' loadResultFile
+#' @param sessionVariables sessionVariablescontaining global information on files to load
+#' @param numberResults limits the number of rows to load for faster debugging
+#' @return data.frame with regression results
+#' @examples loadResultFile(sessionVariables, 100)
 loadResultFile<-function(sessionVariables,numberResults = 100){
   trait = sessionVariables$trait$trait
   if(!is.na(as.numeric(substr(trait,1,1)))) {
     trait = paste0("X",trait)
   }
 #  PHENO = addXToName(PHENO,firstPHENOVar,lastPHENOVar)
-  
   folder = sessionVariables$folder
   fileName <- paste0(folder,trait,".csv")
   if (debugMode == TRUE) {
@@ -346,7 +350,8 @@ loadResultFile<-function(sessionVariables,numberResults = 100){
 #  all.results<-all.results[,1:16]
   all.results<-setcolorder(all.results, c("probeID","BETA","SE", "P_VAL", "FDR","DeltaMeth","N"))
   all.results<-all.results[,1:7]
-  all.results <- dplyr::left_join(all.results, annotation, by = c("probeID" = "name"))
+#  all.results <- dplyr::left_join(all.results, annotation, by = c("probeID" = "name"))
+  all.results <- base::merge(all.results, annotation, by.x = "probeID", by.y = "name", all.x = TRUE, all.y = TRUE)
   all.results<-all.results[all.results$chromosome!="chrY",]
   all.results<-all.results[all.results$chromosome!="chrX",]
   all.results$mLog10FDR<-log10(all.results$FDR)*-1
@@ -355,7 +360,7 @@ loadResultFile<-function(sessionVariables,numberResults = 100){
   #duplicated(all.results$probeID)
   rownames(all.results)<-all.results$probeID
   #in case DeltaMeth does not match BETA
-  all.results$DeltaMeth[(all.results$BETA < 0 & all.results$DeltaMeth > 0)] <- all.results$DeltaMeth*-1
+#  all.results$DeltaMeth[(all.results$BETA < 0 & all.results$DeltaMeth > 0)] <- all.results$DeltaMeth*-1
   return(all.results)
 }
 
@@ -365,10 +370,12 @@ getResultDataSingleTrait <- function(sessionVariables, onlySignificant = FALSE, 
   trait = sessionVariables$trait$trait
   if (isTruthy(trait)) {
 #    dat <- as.data.table(loadResultFile(trait,numberResults))
-    dat <- as.data.table(loadResultFile(sessionVariables,numberResults))
-    rownames(dat) <- rownames(dat)
+#    dat <- as.data.table(loadResultFile(sessionVariables,numberResults))
+#browser()
+    dat <- loadResultFile(sessionVariables,numberResults)
+#    rownames(dat) <- rownames(dat)
     dat = dat[,1:7]
-#wenn gefühlt zu wenig Fälle zurückkommen, dann liegt das am Filtern auf Signifikanz
+# if there are too few cases, then filtering for significant values is the reason
 #    if (onlySignificant == TRUE) {
       dat = dat[dat$P_VAL <= 0.05,]
 #      dat = dat[dat$P_VAL <= 0.01,]
@@ -418,44 +425,47 @@ addLinkToMRCEWASCatalogToHeader <- function(df) {
 
 removeNonVariableProbes<-function(df,NonVariableProbesList){
   `%notin%` <- Negate(`%in%`)
+browser()
   df = df[rownames(df) %notin% NonVariableProbesList,]
   return(df)
 }
 
 removeMultiModelCpGFromBeta<-function(df,multiModList){
   #row.name to column
-  df$CpGName<-row.names(df)
+  df$CpGName<-rownames(df)
   #merge
-  df <- dplyr::inner_join(df, multiModList, by = c("CpGName" = "CpG"))
-  row.names(df)<-df$CpGName
-  df$CpGName<-NULL
+  df <- base::merge(df, multiModList, by.x= "CpGName", by.y = "CpG")
   #select only CpG with NumModes=1
   df<-df[df$NumModes<2,]
   df$NumModes<-NULL
   df$NormalP<-NULL
+  rownames(df)<-df$CpGName
+  df$CpGName<-NULL
   return(df)
 }
 
-removeOutliers3IQR<-function(probes){
-  require(matrixStats)
-  if(nrow(probes) < ncol(probes)) warning("expecting probes are rows (long dataset)")
-  rowIQR <- rowIQRs(probes, na.rm = T)
-  row2575 <- rowQuantiles(probes, probs = c(0.25, 0.75), na.rm = T)
-  maskL <- probes < row2575[,1] - 3 * rowIQR 
-  maskU <- probes > row2575[,2] + 3 * rowIQR 
-  initial_NAs<-rowSums(is.na(probes))
-  probes[maskL] <- NA
-  removed_lower <- rowSums(is.na(probes))-initial_NAs
-  probes[maskU] <- NA
-  removed_upper <- rowSums(is.na(probes))-removed_lower-initial_NAs
-  N_for_probe<-rowSums(!is.na(probes))
-  Log<-data.frame(initial_NAs,removed_lower,removed_upper,N_for_probe)
-  return(list(probes, Log))
-}
+# removeOutliers3IQR<-function(probes){
+#   require(matrixStats)
+#   if(nrow(probes) < ncol(probes)) {
+#     warning("expect probes are rows.")
+#   } 
+#   rowIQR <- rowIQRs(probes, na.rm = T)
+#   row2575 <- rowQuantiles(probes, probs = c(0.25, 0.75), na.rm = T)
+#   maskL <- probes < row2575[,1] - 3 * rowIQR 
+#   maskU <- probes > row2575[,2] + 3 * rowIQR 
+#   initial_NAs<-rowSums(is.na(probes))
+#   probes[maskL] <- NA
+#   removed_lower <- rowSums(is.na(probes))-initial_NAs
+#   probes[maskU] <- NA
+#   removed_upper <- rowSums(is.na(probes))-removed_lower-initial_NAs
+#   N_for_probe<-rowSums(!is.na(probes))
+#   Log<-data.frame(initial_NAs,removed_lower,removed_upper,N_for_probe)
+#   return(list(probes, Log))
+# }
 
 getlistOfResultsDF <- function(folder) {
   if (dir.exists(folder)) {
-    temp <- list.files(path=folder,pattern="*.csv")
+    temp <- list.files(path=folder,pattern="\\.csv$")
     result = list()
     for (i in 1:length(temp)) {
       exposure <- str_sub(temp[i], 1, str_length(temp[i])-4)
@@ -463,6 +473,7 @@ getlistOfResultsDF <- function(folder) {
       if (colnames(firstlines)[1] == "probeID") {
         if (nrow(firstlines) >= 5) {
           if (grepl("adj", temp[i], fixed = TRUE) == TRUE) {
+browser()
             #read results into DF
             resultDF = loadResultFile(exposure)
             #omit unneccesary variables
@@ -484,7 +495,7 @@ getExposuresWithSummary <- function(directory){
   if (dir.exists(directory)) {
     traits <- data.frame(Exposure="ex", MaxN = 1, MinP_VAL = 0, MinFDR = 0, MaxBETA = 1, MaxDeltaMeth = 1, MinDeltaMeth = 1, MaxOutlying = 1, MinOutlying = 0, MaxSkewed = 1, MinSkewed = 0, MaxClumpy = 1, MinClumpy = 0, MaxSparse = 1, MinSparse = 0, MaxStriated = 1, MinStriated = 0, MaxConvex = 1, MinConvex = 0, MaxSkinny = 1, MinSkinny = 0, MaxStringy = 1, MinStringy = 0, MaxMonotonic = 1, MinMonotonic = 0, MaxscagnosticsScore2 = 1, MinscagnosticsScore2 = 0)
     tr = traits
-    temp <- list.files(path=directory,pattern="*.csv")
+    temp <- list.files(path=directory,pattern="\\.csv$")
     for (i in 1:length(temp)) {
   #  for (i in 1:2) {
       firstlines <- read.table(file = as.character(temp[i]), sep = "\t", header = T, nrows = 5)

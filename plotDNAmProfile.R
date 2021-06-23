@@ -2,14 +2,14 @@ plotDNAmProfile_UI <- function(id){
   ns <- NS(id)
   tagList(
     fluidRow(
-      column(width = 10,
-             tags$html("Window size"),
+      # column(width = 10,
+      #        tags$html("Window size"),
              sliderInput(ns("DMRWindow"),"DMR window size",
                          1, 50, 5, 1, width = "100%")
-      ),
-      column(width = 2, style = "margin-top: 25px;",
-             shiny::actionButton(ns("btnDMRWindow"), label = "Window Size"),
-      )
+      # )
+      # column(width = 2, style = "margin-top: 25px;",
+      #        shiny::actionButton(ns("btnDMRWindow"), label = "Window Size"),
+      # )
     ),
     tabsetPanel(
       tabPanel("Visualisation",
@@ -43,23 +43,23 @@ getDMPNearRangeprobeID <- function(DMP, range) {
   probeIDs = a[positionStart:positionEnd,]$name
 }
 
-getDMPNearRange <- function(sessionVariables, DMP, range) {
+#getDMPNearRange <- function(sessionVariables, DMP, range) {
+getDMPNearRange <- function(sessionVariables, range) {
   tryCatch({
-#browser()
     trait = sessionVariables$trait$trait
+    DMP = sessionVariables$probe$probe
     exposure<-gsub("adj","",trait)
     #get exposure data
     traitVar = traitDF(sessionVariables)
     #get DMP range data
     probeIDs = getDMPNearRangeprobeID(DMP,range)
     DMPNearRangeData = as.data.frame(beta.t[,probeIDs])
-#    DMPNearRangeData$ID_Kind = rownames(DMPNearRangeData)
     DMPNearRangeData$ID = rownames(DMPNearRangeData)
+# browser()
+#     annotationShort = subset(annotation, name %in% probeIDs)
     #merge all
-#    traitDMPNearRangeData = base::merge(traitVar, DMPNearRangeData, by.x = config$mergeAttribut, by.y = config$mergeAttribut, all.x = FALSE, all.y=FALSE)
     traitDMPNearRangeData = base::merge(traitVar, DMPNearRangeData, by.x = config$mergeAttribut, by.y = "ID", all.x = FALSE, all.y=FALSE)
     
-#    rownames(traitDMPNearRangeData) = traitDMPNearRangeData$ID_Kind
     rownames(traitDMPNearRangeData) = traitDMPNearRangeData$ID
   }, error=function(err){
     print(paste0("unable find near range for ", DMP, exposure, ". - ", err$message))
@@ -74,73 +74,76 @@ plotDNAmProfile_SERVER <- function(id, sessionVariables) {
     
     id <- showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
     on.exit(removeNotification(id), add = TRUE)
-    plotPcPForDMP(input, output, sessionVariables)
-#    observeEvent(input$btnDMRWindow, ignoreInit = FALSE, {
-    observeEvent(input$btnDMRWindow, ignoreInit = TRUE, {
-      plotPcPForDMP(input, output, sessionVariables)
+    #reDMPNearRange <- reactive({getDMPNearRange(sessionVariables, probe, input$DMRWindow)})
+    reDMPNearRange <- reactive({getDMPNearRange(sessionVariables, input$DMRWindow)})
+
+    output$PlotlyPcPDMPNearRange <- renderPlotly({
+      DMPNearRange = reDMPNearRange()
+      if (!is_empty(DMPNearRange)) {
+        id <- showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
+        on.exit(removeNotification(id), add = TRUE)
+
+        # if (sessionVariables$trait$trait != colnames(DMPNearRange)[3]) {
+        #   DMPNearRange <- getDMPNearRange(sessionVariables, probe, input$DMRWindow)
+        # }
+        #plotlyPcPForDMP(DMPNearRange, sessionVariables, input$DMRWindow)
+#        DMPNearRange = reDMPNearRange()
+#        plotlyPcPForDMP(DMPNearRange, sessionVariables, input$DMRWindow)
+        plotlyPcPForDMP(DMPNearRange, sessionVariables)
+      }
+    })
+
+    output$PlotlyViolinDMPNearRange <- plotly::renderPlotly({
+      DMPNearRange = reDMPNearRange()
+      if (!is_empty(DMPNearRange)) {
+        id <- showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
+        on.exit(removeNotification(id), add = TRUE)
+        #plotlyViolinForDMP(DMPNearRange)
+        plotlyViolinForDMP(DMPNearRange)
+      }
     })
     
-#    return(selectedProbe)
+    output$PcPDMPNearRangeData <- DT::renderDataTable({
+      id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(removeNotification(id), add = TRUE)
+      DMPNearRange = reDMPNearRange()
+      DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange)  
+      datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
+                options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+    }, server = FALSE)
   })
 }
 
-plotPcPForDMP <- function(input, output, sessionVariables) {
-#browser()
-  trait = sessionVariables$trait$trait
-  probe = sessionVariables$probe$probe
-  output$txtTrait = renderText(trait)
-  DMPNearRange <- getDMPNearRange(sessionVariables, probe, input$DMRWindow)
-  output$PlotlyPcPDMPNearRange <- renderPlotly({
-    if (!is_empty(DMPNearRange)) {
-      id <- showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
-      on.exit(removeNotification(id), add = TRUE)
-      plotlyPcPForDMP(DMPNearRange, sessionVariables, input$DMRWindow)
-    }
-  })
-  
-  output$PlotlyViolinDMPNearRange <- plotly::renderPlotly({
-    if (!is_empty(DMPNearRange)) {
-      id <- showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
-      on.exit(removeNotification(id), add = TRUE)
-      plotlyViolinForDMP(DMPNearRange)
-    }
-  })
-#browser()
-#  DMPNearRange <- addLinkToEWASDataHubToHeader(DMPNearRange)
-  DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange)
-  output$PcPDMPNearRangeData <- DT::renderDataTable({
-    id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
-    on.exit(removeNotification(id), add = TRUE)
-    
-    datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
-              options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
-  }, server = FALSE)
-  
-  # datatable(DMPNearRange, extensions = 'Buttons', height = 400, options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE, ordering = TRUE, dom = 'tBS', buttons = c('copy', 'csv', 'excel','pdf')))
-  # datatable(DMPNearRange, extensions = c('Scroller', 'Buttons'), height = 400, options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE, ordering = TRUE, dom = 'tBS', buttons = c('copy', 'csv', 'excel','pdf')))
-  
-}
-
-plotlyPcPForDMP <- function(DMPNearRange, sessionVariables, DMRWindow) {
+plotlyPcPForDMP <- function(DMPNearRange, sessionVariables) {
   tryCatch({
     traitName = colnames(DMPNearRange)[3]
     DMP = sessionVariables$probe$probe
     df <- sessionVariables$resultDataSingleTrait
     df <- resultDataSingleScenarioWithAnnotation(df)
   gene.symbol = df[which(df$probeID == DMP)]$gene.symbol
-#DMPNearRange <- getDMPNearRange(sessionVariables, DMP, input$DMRWindow)
-DMPNearRange <- getDMPNearRange(sessionVariables, DMP, DMRWindow)
     DMPNearRange = na.omit(DMPNearRange)
     DMPNearRangeShort = DMPNearRange[,4:ncol(DMPNearRange)]
     dimensionsList=list()
     P_VAL = sessionVariables$resultDataSingleTrait$P_VAL[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
     DeltaMeth = sessionVariables$resultDataSingleTrait$DeltaMeth[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
     for (i in 1:ncol(DMPNearRangeShort)) {
-      dimension = list(label = colnames(DMPNearRangeShort)[i], values = DMPNearRangeShort[,i],
+      lblCpG = colnames(DMPNearRangeShort)[i]
+      lblP = signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i])]$P_VAL,3)
+      if (isTruthy(lblP)) {
+        lblP = paste0(",\n p: ", lblP)
+        lblDM = paste0(",\n d: ", signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i])]$DeltaMeth,3))
+      }
+      else {
+        lblP = ",\n p: n.s."
+        lblDM = ""
+      }
+      lblSym = paste0(",\n sbl:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$gene.symbol)
+      lblPos = paste0(",\n pos:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$position)
+      label = paste0(lblCpG, lblP, lblDM, lblSym, lblPos)
+      dimension = list(label = label, values = DMPNearRangeShort[,i],
                        range = c(0, 1))
       dimensionsList = append(dimensionsList,list(dimension))
     }
-#browser()
     plot = plot_ly(data = DMPNearRange)
     plot = plot %>% add_trace(type = 'parcoords',
                               line = list(shape = 'spline',
@@ -173,7 +176,6 @@ DMPNearRange <- getDMPNearRange(sessionVariables, DMP, DMRWindow)
 
 plotlyViolinForDMP <- function(DMPNearRange) {
   tryCatch({
-#browser()
     DMPNearRange = na.omit(DMPNearRange)
     dens <- density(DMPNearRange[,3], bw = "sj")
 #    femaleDMPNearRange = DMPNearRange[(DMPNearRange$gender == 'f' || DMPNearRange$gender == 'w'),]
@@ -196,7 +198,6 @@ plotlyViolinForDMP <- function(DMPNearRange) {
     #    plot
     return (plot)
   }, error=function(err){
-#browser()
     print(paste0("unable to plot violin; ", err$message))
     return(empty_plot(err$message))
   });

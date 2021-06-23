@@ -10,37 +10,31 @@ plotTraitDNAm_UI <- function(id){
 
 plotTraitDNAm_SERVER <- function(id, sessionVariables) {
   moduleServer(id, function(input, output, session) {
-#    selectedProbe <- reactiveValues(probe = "", probes = list())
-#    moduleVariables <- reactiveValues(numberResults = 10)
-    
+
     id <- showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
     on.exit(removeNotification(id), add = TRUE)
 
-#    browser()
     trait = sessionVariables$trait$trait
     probe = sessionVariables$probe$probe
     output$plotlyOneProbe <- plotly::renderPlotly(printScatterPlotlyForOneProbeID(sessionVariables))
 #    output$plotlyHorizontalViolin <- plotly::renderPlotly(plotlyHorizontalViolin(traitDF(trait)))
     output$plotlyHorizontalViolin <- plotly::renderPlotly(plotlyHorizontalViolin(traitDF(sessionVariables)))
-
-#    return(selectedProbe)
   })
 }
 
 printScatterPlotlyForOneProbeID<-function(sessionVariables){
-#browser()
   tryCatch({
     probeID = sessionVariables$probe$probe
     trait = sessionVariables$trait$trait
     Name<-as.character(trait)
     Name<-gsub("adj","",Name)
     probeID<-as.character(probeID)
+    #das funktioniert nicht, weil aus irgendeinem Grund schon wieder die rownames fehlen!!!
+    #Lösung: es war data.table, dann geht beta[probeID,] nicht
     beta_single<-beta[probeID,]
     beta_single<-t(beta_single)
     beta_single<-(as.data.frame(beta_single))
-#    beta_single<-tibble::rownames_to_column(beta_single,var="ID_Kind")
-    beta_single<-tibble::rownames_to_column(beta_single,var=config$mergeAttribut)
-    beta_single<-as_tibble(beta_single)
+    beta_single$ID = rownames(beta_single)
     #pick variable from traits dataframe
     traitVar<-traitDF(sessionVariables)
     traitName = sessionVariables$trait$trait
@@ -49,19 +43,14 @@ printScatterPlotlyForOneProbeID<-function(sessionVariables){
     DeltaMeth = sessionVariables$resultDataSingleTrait$DeltaMeth[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
     
     #merge with pheno
-#    library(dplyr)
-#    plotData <- dplyr::inner_join(beta_single, traitVar, by = c("ID_Kind" = "ID_Kind") )
-    plotData = base::merge(beta_single, traitVar, by.x = config$mergeAttribut, by.y = config$mergeAttribut, all.x = FALSE, all.y=FALSE)
+#    plotData = base::merge(beta_single, traitVar, by.x = config$mergeAttribut, by.y = config$mergeAttribut, all.x = FALSE, all.y=FALSE)
+    plotData = base::merge(beta_single, traitVar, by.x = "ID", by.y = config$mergeAttribut, all.x = FALSE, all.y=FALSE)
     plotData <- na.omit(plotData)
     gender <- "factor(gender)"
-    #  plotDataFemale = subset(plotData, (plotData$gender == 'f' || plotData$gender == 'w'))
-    plotDataFemale = subset(plotData, plotData$gender == config$genderFemaleValue) #plotDataFemale = subset(plotData, plotData$gender == 'w')
-    plotDataMale = subset(plotData, plotData$gender == config$genderMaleValue) #plotDataMale = subset(plotData, plotData$gender == 'm')
+    plotDataFemale = subset(plotData, plotData$gender == config$genderFemaleValue)
+    plotDataMale = subset(plotData, plotData$gender == config$genderMaleValue)
     
-#    fmla = as.formula(paste(probeID, "~", Name))
-#    fmla = as.formula(paste0(probeID, "~'", Name,"'"))
     fmla = as.formula(paste0("`", probeID, "` ~ `", Name,"`"))
-#browser()
     m <- lm(fmla, data = plotData)
     plot = broom::augment(m,se_fit=TRUE) %>%
       plot_ly(x = as.formula(paste0("~ `",Name,"`")), showlegend = FALSE) %>%
@@ -99,12 +88,10 @@ printScatterPlotlyForOneProbeID<-function(sessionVariables){
 
 plotlyHorizontalViolin <- function(traitDF) {
   tryCatch({
-#browser()
     traitDF = na.omit(traitDF)
     dens <- density(traitDF[,3], bw = "sj")
-#    femaletraitDF = traitDF[(traitDF$gender == 'f' || traitDF$gender == 'w'),]
-    femaletraitDF = traitDF[(traitDF$gender == config$genderFemaleValue),] #femaletraitDF = traitDF[(traitDF$gender == 'w'),]
-    maletraitDF = traitDF[traitDF$gender == config$genderMaleValue,] #maletraitDF = traitDF[traitDF$gender == 'm',]
+    femaletraitDF = traitDF[(traitDF$gender == config$genderFemaleValue),]
+    maletraitDF = traitDF[traitDF$gender == config$genderMaleValue,]
     femaleDens <- density(femaletraitDF[,3], bw = "sj")
     maleDens <- density(maletraitDF[,3], bw = "sj")
     plot = plot_ly()

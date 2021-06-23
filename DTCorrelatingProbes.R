@@ -22,6 +22,8 @@ DTCorrelatingProbes_UI <- function(id){
 }
 
 correlatingProbes <- function(sessionVariables){
+#browser()
+  message(paste0(Sys.time(), " getting correlating probes."))
   probeID = sessionVariables$probe$probe
   if (!is_empty(probeID)) {
 #browser()
@@ -38,7 +40,6 @@ correlatingProbes <- function(sessionVariables){
   }
 }
 
-
 DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
   moduleServer(id, function(input, output, session) {
 #    selectedProbe <- reactiveValues(probe = "", probes = list())
@@ -46,10 +47,9 @@ DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
     
     id <- showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
     on.exit(removeNotification(id), add = TRUE)
-    CP = correlatingProbes(sessionVariables)
-    CP <- addLinkToEWASDataHub(CP)
-    CP <- addLinkToMRCEWASCatalog(CP)
-#browser()    
+    
+    reDFCorrelatingProbes <- reactive({correlatingProbes(sessionVariables)})
+    
     output$DTCorrelatingProbes <- DT::renderDataTable({
       id <- showNotification("Printing data...", duration = NULL, closeButton = FALSE)
       on.exit(removeNotification(id), add = TRUE)
@@ -57,8 +57,13 @@ DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
       # datatable(shared_df_correlatingProbes, extensions="Scroller", style="bootstrap", class="compact", width="100%",
       #           options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE))
       tryCatch({
-      datatable(CP, escape = F, extensions="Scroller", style="bootstrap", class="compact", width="100%",
-                options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE))
+        message(paste0(Sys.time(), " rendering correlating data table."))
+        #    CP = correlatingProbes(sessionVariables)
+        CP <- reDFCorrelatingProbes()
+        CP <- addLinkToEWASDataHub(CP)
+        CP <- addLinkToMRCEWASCatalog(CP)
+        datatable(CP, escape = F, extensions="Scroller", style="bootstrap", class="compact", width="100%",
+                  options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE))
       }, errror = function(err) {
         validate(need(nrow(CP>0,"No data to show")))
       })
@@ -67,6 +72,7 @@ DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
       observeEvent(input$DTCorrelatingProbes_cell_clicked, {
       selected = input$DTCorrelatingProbes_rows_selected
       if (length(selected)) {
+        CP <- reDFCorrelatingProbes()
         selectedProbeIDs <- CP[selected,]$probeID
         selectedProbes <- beta.t[,selectedProbeIDs]
         selectedProbes <- as.data.frame(selectedProbes)
@@ -80,12 +86,13 @@ DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
           result = list()
           foreach(i=1:ncol(selectedProbes)) %do% {
             traitVar<-traitDF(sessionVariables)
-            selectedProbes$ID_Kind <- rownames(selectedProbes)
+#            selectedProbes$ID_Kind <- rownames(selectedProbes)
+            selectedProbes$ID <- rownames(selectedProbes)
             selectedProbe <- as.data.frame(selectedProbes[,i])
-            colnames(selectedProbe)[1] <-colnames(selectedProbes)[i]
-            selectedProbe$ID_Kind <- rownames(selectedProbes)
-#            selectedProbeWithExposure <- dplyr::inner_join(traitVar, selectedProbe, by = c("ID_Kind" = "ID_Kind") )
-            selectedProbeWithExposure = base::merge(traitVar, selectedProbe, by.x = config$mergeAttribut, by.y = config$mergeAttribut, all.x = FALSE, all.y=FALSE)
+            colnames(selectedProbe)[1] <- colnames(selectedProbes)[i]
+            message(paste0(Sys.time(), " merging correlating probes: ", colnames(selectedProbes)[i]))
+            selectedProbe$ID <- rownames(selectedProbes)
+            selectedProbeWithExposure = base::merge(traitVar, selectedProbe, by.x = config$mergeAttribut, by.y = "ID", all.x = FALSE, all.y=FALSE)
             selectedProbeWithExposure <- na.omit(selectedProbeWithExposure)
             result = c(result,list(selectedProbeWithExposure))
           }
@@ -94,12 +101,10 @@ DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
 
             plotList = list()
             dfList = result
-            #browser()
             if (!is_null(dfList)) {
               id <- showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
               on.exit(removeNotification(id), add = TRUE)
               foreach(i=1:length(dfList)) %do% {
-#browser()
                 df = as.data.frame(dfList[i])
                 fmla = as.formula(paste0("`", colnames(df)[4], "` ~ `", colnames(df)[3], "`"))
                 m <- lm(fmla, data = df)
@@ -116,14 +121,12 @@ DTCorrelatingProbes_SERVER <- function(id, sessionVariables) {
                 plotList = c(plotList,list(plot))
               }
               plotlyscatter <- plotly::subplot(plotList, shareX = TRUE, nrows = length(dfList))
-              #      return(plotly::gg2list(plotlyscatter))
               return(plotlyscatter)
             }
           })
         }
       }
     })
-#    return(selectedProbe)
   })
 }
 

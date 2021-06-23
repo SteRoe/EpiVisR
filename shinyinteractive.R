@@ -8,9 +8,9 @@ dataDir = "F:/roeder/EWAS_DrugMetabolites/all/"
 baseDir = "Z:/EWAS_VOC/"
 dataDir = "Z:/EWAS_VOC/all/"
 dataDir = "Z:/EWAS_VOC/female/"
-
+dataDir = "F:/roeder/EWAS_DrugMetabolites/female/"
 setwd(dataDir)
-source(paste0(appDir,"shiny_functions.R"))
+source(paste0(appDir,"util.R"))
 
 #gc(verbose=T)
 
@@ -27,9 +27,13 @@ configData <- config::get()
 config <- config::merge(configApp, configData)
 loadObjects()
 
+#check, whether beta and beta.t are correctly loaded
+rownames(beta) #rownames are missing after removeNonVariableProbes(), if beta is data.table
+colnames(beta.t)
+
 setwd(appDir)
 setwd(dataDir)
-conflicts(detail=TRUE)
+#conflicts(detail=TRUE)
 
 # tell shiny to log all reactivity
 #reactlog_enable()
@@ -46,7 +50,6 @@ source(paste0(appDir,"server.R"))
 shiny::shinyApp(ui,server)
 
 ########################Testing###########################
-
 
 # once app has closed, display reactlog from shiny
 shiny::reactlogShow()

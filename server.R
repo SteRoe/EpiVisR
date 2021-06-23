@@ -40,8 +40,10 @@ server <- function(input, output, session) {
     if (isTruthy(sessionVariables$trait$trait)) {
       df = getResultDataSingleTrait(sessionVariables,100)
       sessionVariables$resultDataSingleTrait = df
+      message(paste0(Sys.time(), " getting pheno information."))
+      sessionVariables$traitDF <- traitDF(sessionVariables) #if error occurs here, then the wrong PHENO file is referenced
 #browser()
-      sessionVariables$traitDF <- traitDF(sessionVariables)
+#      sessionVariables$traitDF <- traitDF(sessionVariables$trait$trait) #if error occurs here, then the wrong PHENO file is referenced      
       
       plotManhattanVolcano_SERVER("M", sessionVariables)
     }
