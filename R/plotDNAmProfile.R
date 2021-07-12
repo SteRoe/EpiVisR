@@ -41,7 +41,7 @@ getDMPNearRange <- function(globalVariables, sessionVariables, range) {
     DMP = sessionVariables$probe$probe
     trait<-gsub("adj","",trait)
     #get trait data
-    traitVar = traitDF(sessionVariables)
+    traitVar = traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
     #get DMP range data
     probeIDs = getDMPNearRangeprobeID(globalVariables, DMP,range)
     DMPNearRangeData = as.data.frame(globalVariables$beta.t[,probeIDs])
@@ -84,7 +84,7 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
       id <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
       on.exit(shiny::removeNotification(id), add = TRUE)
       DMPNearRange = reDMPNearRange()
-      DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange)
+      DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange, globalVariables$config$baseURL_MRCEWASCatalog)
       DT::datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
                 options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
     }, server = FALSE)
@@ -96,7 +96,7 @@ plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
     traitName = colnames(DMPNearRange)[3]
     DMP = sessionVariables$probe$probe
     df <- sessionVariables$resultDataSingleTrait
-    df <- resultDataSingleScenarioWithAnnotation(globalVariables, df)
+    df <- resultDataSingleScenarioWithAnnotation(globalVariables$annotation, df)
     gene.symbol = df[which(df$probeID == DMP),]$gene.symbol
     DMPNearRange = stats::na.omit(DMPNearRange)
     DMPNearRangeShort = DMPNearRange[,4:ncol(DMPNearRange)]

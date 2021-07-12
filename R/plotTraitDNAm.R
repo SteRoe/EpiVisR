@@ -16,7 +16,7 @@ plotTraitDNAm_SERVER <- function(id, globalVariables, sessionVariables) {
     trait = sessionVariables$trait$trait
     probe = sessionVariables$probe$probe
     output$plotlyOneProbe <- plotly::renderPlotly(printScatterPlotlyForOneProbeID(globalVariables, sessionVariables))
-    output$plotlyHorizontalViolin <- plotly::renderPlotly(plotlyHorizontalViolin(traitDF(sessionVariables)))
+    output$plotlyHorizontalViolin <- plotly::renderPlotly(plotlyHorizontalViolin(traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut), globalVariables$config$genderFemaleValue, globalVariables$config$genderMaleValue))
   })
 }
 
@@ -34,7 +34,7 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
     beta_single<-(as.data.frame(beta_single))
     beta_single$ID = rownames(beta_single)
     #pick variable from traits dataframe
-    traitVar<-traitDF(sessionVariables)
+    traitVar<-traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
     traitName = sessionVariables$trait$trait
     DMP = sessionVariables$probe$probe
     P_VAL = sessionVariables$resultDataSingleTrait$P_VAL[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
@@ -84,12 +84,12 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
   });
 }
 
-plotlyHorizontalViolin <- function(traitDF) {
+plotlyHorizontalViolin <- function(traitDF, femaleValue, maleValue) {
   tryCatch({
     traitDF = stats::na.omit(traitDF)
     dens <- stats::density(traitDF[,3], bw = "sj")
-    femaletraitDF = traitDF[(traitDF$gender == globalVariables$config$genderFemaleValue),]
-    maletraitDF = traitDF[traitDF$gender == globalVariables$config$genderMaleValue,]
+    femaletraitDF = traitDF[traitDF$gender == femaleValue,]
+    maletraitDF = traitDF[traitDF$gender == maleValue,]
     femaleDens <- stats::density(femaletraitDF[,3], bw = "sj")
     maleDens <- stats::density(maletraitDF[,3], bw = "sj")
     plot = plotly::plot_ly()
@@ -107,7 +107,7 @@ plotlyHorizontalViolin <- function(traitDF) {
     #    plot
     return (plot)
   }, error=function(err){
-    print(paste0("unable to print pc plot; ",err$message))
+    print(paste0("unable to print horizontal violin plot; ",err$message))
     return(empty_plot(err$message))
   });
 }

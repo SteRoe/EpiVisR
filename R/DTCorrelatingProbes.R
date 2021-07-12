@@ -41,8 +41,8 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
         print(paste0(Sys.time(), " rendering correlating data table."))
         #    CP = correlatingProbes(sessionVariables)
         CP <- reDFCorrelatingProbes()
-        CP <- addLinkToEWASDataHub(CP)
-        CP <- addLinkToMRCEWASCatalog(CP)
+        CP <- addLinkToEWASDataHub(CP, globalVariables$config$baseURL_EWASDataHub)
+        CP <- addLinkToMRCEWASCatalog(CP, globalVariables$config$baseURL_MRCEWASCatalog)
         DT::datatable(CP, escape = F, extensions="Scroller", style="bootstrap", class="compact", width="100%",
                   options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE))
       }, errror = function(err) {
@@ -67,7 +67,7 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
           result = list()
           i = NULL
           foreach(i=1:ncol(selectedProbes)) %do% {
-            traitVar<-traitDF(sessionVariables)
+            traitVar<-traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
 #            selectedProbes$ID_Kind <- rownames(selectedProbes)
             selectedProbes$ID <- rownames(selectedProbes)
             selectedProbe <- as.data.frame(selectedProbes[,i])

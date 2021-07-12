@@ -111,7 +111,7 @@ getDFforManhattanVolcano <- function(globalVariables, sessionVariables, n) {
   df <- sessionVariables$resultDataSingleTrait
   df <- df[order(df$P_VAL,decreasing=FALSE),]
   df <- df[1:n,]
-  df <- resultDataSingleScenarioWithAnnotation(globalVariables, df)
+  df <- resultDataSingleScenarioWithAnnotation(globalVariables$annotation, df)
   df <- resultDataSingleScenarioWithAnnotationEWAScatalogCount(globalVariables, df)
   return(df)
 }
@@ -164,7 +164,7 @@ getDFforPathwayAnalysis <- function (df) {
   foreach(i=1:nrow(df)) %do% {
     df[i,]$Gene.symbol <- unlist(strsplit(df[i,]$gene.symbol,";"))[1]
   }
-  df <- df[,-"gene.symbol"]
+  df$gene.symbol <- NULL
   df <- subset(df, !is.na(df$Gene.symbol))
   setcolorder(df, c("probeID","Gene.symbol","DeltaMeth","P_VAL"))
   return(df)

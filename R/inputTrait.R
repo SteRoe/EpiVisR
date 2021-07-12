@@ -18,6 +18,10 @@ inputTrait_UI <- function(id){
         ),
         shinyBS::bsCollapsePanel(ns("Traits"),
           shiny::tabsetPanel(
+            shiny::tabPanel("Long Select",
+              DT::dataTableOutput(ns("traits"))
+              #shiny::actionButton(ns("btnSelectTraitLong"), label = "Select Trait")
+            ),
             shiny::tabPanel("Short Select",
               shiny::fluidRow(
                 shiny::column(6,
@@ -27,10 +31,6 @@ inputTrait_UI <- function(id){
                   shiny::actionButton(ns("btnSelectTraitShort"), label = "Select Trait")
                 )
               )
-            ),
-            shiny::tabPanel("Long Select",
-              DT::dataTableOutput(ns("traits"))
-#              shiny::actionButton(ns("btnSelectTraitLong"), label = "Select Trait")
             )
           ),
           shiny::fluidRow(
@@ -106,8 +106,9 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   id <- shiny::showNotification("Filling data table...", duration = NULL, closeButton = FALSE)
   on.exit(shiny::removeNotification(id), add = TRUE)
   print(paste0(Sys.time(), " before renderText."))
+#browser()
   sessionVariables$traitsDFLong = getTraitsDFLong(globalVariables)
-  output$txtDataFile = shiny::renderText(sessionVariables$dataFileName)
+  output$txtDataFile = shiny::renderText(globalVariables$config$traitFileName) #(sessionVariables$dataFileName)
   print(paste0(Sys.time(), " assign traitsDFLong."))
   tryCatch({
     print(paste0(Sys.time(), " getTraits."))

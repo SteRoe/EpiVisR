@@ -4,12 +4,12 @@
 \alias{loadResultFile}
 \title{loadResultFile}
 \usage{
-loadResultFile(sessionVariables, numberResults = 100)
+loadResultFile(globalVariables, sessionVariables)
 }
 \arguments{
-\item{sessionVariables}{sessionVariables loads files with globally available information (beta, trait)}
+\item{globalVariables}{globalVariables loads files with globally available information (beta, trait)}
 
-\item{numberResults}{limits the number of rows to load for faster debugging}
+\item{sessionVariables}{sessionVariables}
 }
 \value{
 data.frame with regression results

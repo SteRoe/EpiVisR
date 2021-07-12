@@ -77,25 +77,15 @@ EpiVisRApp <- function() {
 #   }
 # }
 
+#' getTraitsDFLong
+#' gets back the currently selected trait together with gender information and traitnames were replaced with filename compatible characters
+#' @param globalVariables contains all global available Objects
+#' @return data.frame
+# examples EpiVisR::getTraitsDFLong(globalVariables)
 getTraitsDFLong <- function(globalVariables) {
   if (dir.exists(globalVariables$config$dataDir)) {
-    # tryCatch({
-    #   setwd(globalVariables$folder)
-    # }, error=function(err){
-    #   message(paste0("unable to open work folder ", globalVariables$folder))
-    #   return()
-    # });
-    # tryCatch({
-    # }, error=function(err){
-    #   #      print(paste0("unable open work folder ", dataDir))
-    #   errortext = paste0("unable open read config.yml in ", globalVariables$folder)
-    #   message(errortext)
-    #   id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
-    # });
     tryCatch({
-#browser()
-      traitFileName <- globalVariables$config$traitFileName
-      sessionVariables$dataFileName = traitFileName
+      traitFileName = globalVariables$config$traitFileName #sessionVariables$dataFileName
       traitDFLong<-fread(file=traitFileName,sep="\t",dec=".",header=TRUE, data.table = FALSE)
       traitDFLong<-as.data.frame(traitDFLong)
       rownames(traitDFLong) = traitDFLong[,globalVariables$config$mergeAttribut]
@@ -104,17 +94,10 @@ getTraitsDFLong <- function(globalVariables) {
       genderFileName <- globalVariables$config$genderFileName
       Gender<-fread(file=genderFileName, sep="\t", dec=".", data.table = FALSE)
       Gender<-base::subset(Gender, select=c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut))
-#      Gender<-Gender[, c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)]
       Gender = as.data.frame(Gender)
       traitDFLong = base::merge(traitDFLong, Gender, by.x = globalVariables$config$mergeAttribut, by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
-      # firstPHENOVar <- globalVariables$config$firstPHENOVar + ncol(P) - 1
-      # lastPHENOVar <- globalVariables$config$lastPHENOVar + ncol(P) - 1
-#      traitDFLongWinsorized = winsorize(traitDFLong,globalVariables$config$winsorTrim,firstPHENOVar,lastPHENOVar)
-      # traitDFLongWinsorized = winsorize(traitDFLong,globalVariables$config$winsorTrim,1,ncol(traitDFLong))
-      # traitDFLong = traitDFLongWinsorized
       return (traitDFLong)
     }, error=function(err){
-#      print(paste0("unable open work folder ", dataDir))
       errortext = paste0("unable open work folder ", globalVariables$folder)
       message(errortext)
       id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
@@ -224,40 +207,11 @@ winsorize <- function(traitDF, trim, startVar, endVar) {
   return (traitDF)
 }
 
-# getGoTerms <- function(geneSymbols) {
-#   if (!is_empty(geneSymbols)) {
-#     # also look for "DOSE" database from slides 21.4. 17:35 to find affected diseases on the general levelBiocManager::install("GOSim")
-#     BiocManager::install("GOSim")
-#     library(GOSim)
-#     library(biomaRt)
-#     biomaRt::g
-#     GO_tbl <- getGO(organism = "Homo sapiens",
-#                     genes    = c("AT1G06090", "AT1G06100"),
-#                     filters  = "ensembl_gene_id")
-#     getGoTerms
-#     library("GO.db")
-#
-#     sG <- sample(keys(GO.db, "GOID"), 8)
-#
-#     gT <- getGOTerm(sG)
-#     gP <- getGOParents(sG)
-#     gC <- getGOChildren(sG)
-#     gcat <- getGOOntology(sG)
-#
-#   }
-# }
-
-traitDF <- function(sessionVariables) {
+traitDF <- function(sessionVariables, mergeAttribut, genderAttribut) {
   trait = sessionVariables$trait$trait
-  df = sessionVariables$traitsDFLong[,c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut, trait)]
+  df = sessionVariables$traitsDFLong[,c(mergeAttribut, genderAttribut, trait)]
   return (df)
 }
-
-# geneSymbols <- function(currentProbeID) {
-#   geneSymbols = str_split (annotation[annotation$name == currentProbeID,]$gene.symbol, " ")
-#   #  geneSymbols = str_split (subset(annotation, annotation$name == currentProbeID), " ")
-#   return (geneSymbols)
-# }
 
 #' loadResultFile
 #' @param globalVariables globalVariables loads files with globally available information (beta, trait)
@@ -298,11 +252,18 @@ loadResultFile<-function(globalVariables, sessionVariables){
   return(all.results)
 }
 
+#' getResultDataSingleTrait
+#' gets back the currently selected trait
+#' @param globalVariables contains all global available Objects
+#' @param sessionVariables contains all session objects
+#' @return data.frame
+# examples EpiVisR::getResultDataSingleTrait(globalVariables, sessionVariables, onlySignificant)
 getResultDataSingleTrait <- function(globalVariables, sessionVariables, onlySignificant = FALSE) {
   id <- shiny::showNotification("Reading data...", duration = NULL, closeButton = FALSE)
   on.exit(shiny::removeNotification(id), add = TRUE)
   trait = sessionVariables$trait$trait
   if (shiny::isTruthy(trait)) {
+#    dat <- NULL
     dat <- loadResultFile(globalVariables, sessionVariables)
 #    rownames(dat) <- rownames(dat)
     dat = dat[,1:7]
@@ -311,46 +272,68 @@ getResultDataSingleTrait <- function(globalVariables, sessionVariables, onlySign
 #      dat = dat[dat$P_VAL <= 0.01,]
 #    }
     dat$DeltaMeth = round(dat$DeltaMeth, 5)
-    dat <- addLinkToEWASDataHub(dat)
-    dat <- addLinkToMRCEWASCatalog(dat)
+    dat <- addLinkToEWASDataHub(dat, globalVariables$config$baseURL_EWASDataHub)
+    dat <- addLinkToMRCEWASCatalog(dat, globalVariables$config$baseURL_MRCEWASCatalog)
     return (dat)
   }
 }
 
-addLinkToEWASDataHub <- function(df){
+#' addLinkToEWASDataHub
+#' adds links to EWASDataHub to a data.frame as separate column
+#' @param df data.frame to which links should be added
+#' @param baseURL string describing link
+#' @return data.frame
+# examples EpiVisR::addLinkToEWASDataHub(data.frame, baseURL)
+addLinkToEWASDataHub <- function(df, baseURL){
   #provide link to EWAS data hub
   # df = dplyr::mutate(df, probeID = stringr::str_replace_all(df$probeID, ' ', '%20'),
   #           EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_EWASDataHub, probeID, '>', df$probeID,'</a>' ))
-  df$EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_EWASDataHub, df$probeID, '>', df$probeID,'</a>' )
+  df$EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, df$probeID, '>', df$probeID,'</a>' )
   return(df)
 }
 
-addLinkToMRCEWASCatalog <- function(df){
+#' addLinkToMRCEWASCatalog
+#' adds links to MRC EWAS catalog to a data.frame as separate column
+#' @param df data.frame to which links should be added
+#' @param baseURL string describing link
+#' @return data.frame
+# examples EpiVisR::addLinkToMRCEWASCatalog(data.frame)
+addLinkToMRCEWASCatalog <- function(df, baseURL){
   #provide link to MRC EWAS catalog
   # df = dplyr::mutate(df, probeID = stringr::str_replace_all(df$probeID, ' ', '%20'),
   #             MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_MRCEWASCatalog, probeID, '>', df$probeID,'</a>' ))
-  df$MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_MRCEWASCatalog, df$probeID, '>', df$probeID,'</a>' )
+  df$MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, df$probeID, '>', df$probeID,'</a>' )
   return(df)
 }
 
-addLinkToEWASDataHubToHeader <- function(df) {
+#' addLinkToEWASDataHubToHeader
+#' adds links to EWAS data hub to a data.frame into first line
+#' @param df data.frame to which links should be added
+#' @return data.frame
+# examples EpiVisR::addLinkToEWASDataHubToHeader(data.frame)
+addLinkToEWASDataHubToHeader <- function(df, baseURL) {
   i <- NULL
   foreach(i=1:ncol(df)) %do% {
     if (grepl("cg", colnames(df)[i], fixed = TRUE) == TRUE) {
       probeID = colnames(df)[i]
-      EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_EWASDataHub, probeID, '>', probeID,'</a>' )
+      EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, probeID, '>', probeID,'</a>' )
       colnames(df)[i] = EWASDataHub
     }
   }
   return(df)
 }
 
-addLinkToMRCEWASCatalogToHeader <- function(df) {
+#' addLinkToMRCEWASCatalogToHeader
+#' adds links to MRC EWAS catalog to a data.frame into first line
+#' @param df data.frame to which links should be added
+#' @return data.frame
+# examples EpiVisR::addLinkToMRCEWASCatalogToHeader(data.frame)
+addLinkToMRCEWASCatalogToHeader <- function(df, baseURL) {
   i <- NULL
   foreach(i=1:ncol(df)) %do% {
     if (grepl("cg", colnames(df)[i], fixed = TRUE) == TRUE) {
       probeID = colnames(df)[i]
-      MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_MRCEWASCatalog, probeID, '>', probeID,'</a>' )
+      MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, probeID, '>', probeID,'</a>' )
       colnames(df)[i] = MRCEWASCatalog
     }
   }
@@ -363,7 +346,13 @@ addLinkToMRCEWASCatalogToHeader <- function(df) {
 #   return(df)
 # }
 
-removeMultiModelCpGFromBeta<-function(df,multiModList){
+#' removeMultiModelCpGFromBeta
+#' removes multimodal CpG from data.frame
+#' @param data.frame to which links should be added
+#' @param multiModList list with multimodal CpG
+#' @return data.frame
+# examples EpiVisR::removeMultiModelCpGFromBeta(data.frame, multiModList)
+removeMultiModelCpGFromBeta<-function(df, multiModList){
   #row.name to column
   df$CpGName<-rownames(df)
   #merge
@@ -377,163 +366,16 @@ removeMultiModelCpGFromBeta<-function(df,multiModList){
   return(df)
 }
 
-# removeOutliers3IQR<-function(probes){
-#   require(matrixStats)
-#   if(nrow(probes) < ncol(probes)) {
-#     warning("expect probes are rows.")
-#   }
-#   rowIQR <- rowIQRs(probes, na.rm = T)
-#   row2575 <- rowQuantiles(probes, probs = c(0.25, 0.75), na.rm = T)
-#   maskL <- probes < row2575[,1] - 3 * rowIQR
-#   maskU <- probes > row2575[,2] + 3 * rowIQR
-#   initial_NAs<-rowSums(is.na(probes))
-#   probes[maskL] <- NA
-#   removed_lower <- rowSums(is.na(probes))-initial_NAs
-#   probes[maskU] <- NA
-#   removed_upper <- rowSums(is.na(probes))-removed_lower-initial_NAs
-#   N_for_probe<-rowSums(!is.na(probes))
-#   Log<-data.frame(initial_NAs,removed_lower,removed_upper,N_for_probe)
-#   return(list(probes, Log))
-# }
-
-# getlistOfResultsDF <- function(folder) {
-#   if (dir.exists(folder)) {
-#     temp <- list.files(path=folder,pattern="\\.csv$")
-#     result = list()
-#     for (i in 1:length(temp)) {
-#       exposure <- stringr::str_sub(temp[i], 1, stringr::str_length(temp[i])-4)
-# #      firstlines <- utils::read.table(file = paste0(as.character(exposure),".csv"),sep = "\t", header = T,nrows = 5)
-#       firstlines <- data.table::fread(file = paste0(as.character(exposure),".csv"),sep = "\t", header = T,nrows = 5)
-#       if (colnames(firstlines)[1] == "probeID") {
-#         if (nrow(firstlines) >= 5) {
-#           if (grepl("adj", temp[i], fixed = TRUE) == TRUE) {
-#             #read results into DF
-# #            resultDF = loadResultFile(exposure)
-#             resultDF = loadResultFile(globalVariables = globalVariables)
-#             #omit unneccesary variables
-#             resultDF = resultDF[,c("probeID","P_VAL","DeltaMeth")]
-#             resultDF = list(resultDF)
-#             names(resultDF) = exposure
-#             result = append(result,resultDF)
-#           }
-#         }
-#       }
-#     }
-#     saveRDS (result,file="listOfResultsDF.RDS")
-#     return (result)
-#   }
-# }
-#
-# getExposuresWithSummary <- function(globalVariables, directory){
-#   if (dir.exists(directory)) {
-#     traits <- data.frame(Exposure="ex", MaxN = 1, MinP_VAL = 0, MinFDR = 0, MaxBETA = 1, MaxDeltaMeth = 1, MinDeltaMeth = 1, MaxOutlying = 1, MinOutlying = 0, MaxSkewed = 1, MinSkewed = 0, MaxClumpy = 1, MinClumpy = 0, MaxSparse = 1, MinSparse = 0, MaxStriated = 1, MinStriated = 0, MaxConvex = 1, MinConvex = 0, MaxSkinny = 1, MinSkinny = 0, MaxStringy = 1, MinStringy = 0, MaxMonotonic = 1, MinMonotonic = 0, MaxscagnosticsScore2 = 1, MinscagnosticsScore2 = 0)
-#     tr = traits
-#     temp <- list.files(path=directory,pattern="\\.csv$")
-#     for (i in 1:length(temp)) {
-#   #  for (i in 1:2) {
-# #      firstlines <- utils::read.table(file = as.character(temp[i]), sep = "\t", header = T, nrows = 5)
-#       firstlines <- data.table::fread(file = as.character(temp[i]), sep = "\t", header = T, nrows = 5)
-#       if (colnames(firstlines)[1] == "probeID") {
-#         if (nrow(firstlines) >= 5) {
-#           if (grepl("adj", temp[i], fixed = TRUE) == FALSE) {
-#             fileName <- stringr::str_sub(temp[i], 1, stringr::str_length(temp[i])-4)
-#             tr$Exposure = fileName
-#             fileName <- paste0(fileName,".csv")
-#             if (globalVariables$config$debugMode == TRUE) {
-#               all.results <- fread(fileName,stringsAsFactors = FALSE,header = TRUE, sep = "\t", nrows = 1000)
-#             }
-#             else {
-#               all.results <- fread(fileName,stringsAsFactors = FALSE,header = TRUE, sep = "\t")
-#             }
-#             all.results = all.results[order(all.results$N,decreasing = TRUE),]
-#             tr$MaxN = all.results$N[1]
-#             all.results = all.results[order(all.results$P_VAL),]
-#             tr$MinP_VAL = all.results$P_VAL[1]
-#             all.results = all.results[order(all.results$FDR),]
-#             tr$MinFDR = all.results$FDR[1]
-#             all.results = all.results[order(all.results$BETA),]
-#             tr$MaxBETA = all.results$BETA[1]
-#             all.results = all.results[order(all.results$DeltaMeth),]
-#             tr$MaxDeltaMeth = max(all.results$DeltaMeth)
-#             tr$MinDeltaMeth = min(all.results$DeltaMeth)
-#             all.results = all.results[order(all.results$Outlying),]
-#             tr$MaxOutlying = max(all.results$Outlying)
-#             tr$MinOutlying = min(all.results$Outlying)
-#             all.results = all.results[order(all.results$Skewed),]
-#             tr$MaxSkewed = max(all.results$Skewed)
-#             tr$MinSkewed = min(all.results$Skewed)
-#             all.results = all.results[order(all.results$Clumpy),]
-#             tr$MaxClumpy = max(all.results$Clumpy)
-#             tr$MinClumpy = min(all.results$Clumpy)
-#             all.results = all.results[order(all.results$Sparse),]
-#             tr$MaxSparse = max(all.results$Sparse)
-#             tr$MinSparse = min(all.results$Sparse)
-#             all.results = all.results[order(all.results$Striated),]
-#             tr$MaxStriated = max(all.results$Striated)
-#             tr$MinStriated = min(all.results$Striated)
-#             all.results = all.results[order(all.results$Convex),]
-#             tr$MaxConvex = max(all.results$Convex)
-#             tr$MinConvex = min(all.results$Convex)
-#             all.results = all.results[order(all.results$Skinny),]
-#             tr$MaxSkinny = max(all.results$Skinny)
-#             tr$MinSkinny = min(all.results$Skinny)
-#             all.results = all.results[order(all.results$Stringy),]
-#             tr$MaxStringy = max(all.results$Stringy)
-#             tr$MinStringy = min(all.results$Stringy)
-#             all.results = all.results[order(all.results$Monotonic),]
-#             tr$MaxMonotonic = max(all.results$Monotonic)
-#             tr$MinMonotonic = min(all.results$Monotonic)
-#             all.results = all.results[order(all.results$scagnosticsScore2),]
-#             tr$MaxscagnosticsScore2 = max(all.results$scagnosticsScore2)
-#             tr$MinscagnosticsScore2 = min(all.results$scagnosticsScore2)
-#             traits = rbind(traits, tr)
-#           }
-#         }
-#       }
-#     }
-#     #remove dummy exposure
-#     traits <- traits[-c(1), ]
-#     return(traits)
-#   }
-# }
-
-# getDMRs <- function(exposure){
-#   if (shiny::isTruthy(exposure)) {
-#     tryCatch({
-#       fileNameSelect = paste0(exposure,"_dmrff_dmrs_select",".rda")
-#       load(fileNameSelect) # into df dmrs_select originally from dmrff.cohort
-# browser() # check reason for dmrs_select
-#       DMRs = dmrs_select
-#       DMRs$Exposure = exposure
-#     }, error=function(err){
-#       print(paste0("unable find DMR for ",exposure))
-#     });
-#     return(DMRs)
-#   }
-# }
-
-# getDMRSummary <- function(directory){
-#   if (dir.exists(directory)) {
-#     #template for DMR df
-#     DMR <- data.frame()#(DMR="DMR")
-#     DMRs = DMR
-#     filterSubstring = "_dmrff_dmrs_select_sites"
-#     temp <- list.files(path=directory,pattern="*.rda")
-#     for (i in 1:length(temp)) {
-#       if (grepl(filterSubstring, temp[i], fixed = TRUE) == TRUE) {
-#         Exposure <- stringr::str_sub(temp[i], 1, stringr::str_length(temp[i]) - stringr::str_length(filterSubstring) - stringr::str_length(".rda"))
-#         DMRs = rbind(DMRs,getDMRs(Exposure))
-#       }
-#     }
-#     #remove dummy exposure
-#     DMRs <- DMRs[-c(1), ]
-#     return(DMRs)
-#   }
-# }
-
-reducedAnnotation <- function(globalVariables){
-#browser()
-  a = globalVariables$annotation
+#' reducedAnnotation
+#' expects a data.frame with annotation for Illuminas 450k array like provided by meffil package
+#' removes chromosome X and Y from annotation data.frame and sorts it by chromosome number and position
+#' removes attributes type, target and meth.dye from data.frame
+#' @param a data.frame to which links should be added
+#' @return data.frame
+# examples EpiVisR::reducedAnnotation(data.frame)
+#reducedAnnotation <- function(globalVariables){
+reducedAnnotation <- function(a){
+#  a = globalVariables$annotation
   a$type = NULL
   a$target = NULL
   a$meth.dye = NULL
@@ -547,8 +389,17 @@ reducedAnnotation <- function(globalVariables){
   return (a)
 }
 
-resultDataSingleScenarioWithAnnotation <- function(globalVariables, df){
-  a = reducedAnnotation(globalVariables)
+#' resultDataSingleScenarioWithAnnotation
+#' expects annotation and data.frame
+#' removes long stromgs from gene.symbol
+#' removes attributes accession, region, cpg.island.name, relation.to.island and snp.exclude from data.frame
+#' @param annotation data.frame to which links should be added
+#' @param df data.frame to which links should be added
+#' @return data.frame
+# examples EpiVisR::resultDataSingleScenarioWithAnnotation(data.frame)
+resultDataSingleScenarioWithAnnotation <- function(annotation, df){
+#  a = reducedAnnotation(globalVariables)
+  a = reducedAnnotation(annotation)
   a$gene.symbolShort = stringr::str_sub(a$gene.symbol, 1, 20) #NULL
   a$gene.accession = NULL
   a$gene.region = NULL
