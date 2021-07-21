@@ -1,5 +1,5 @@
 Package: EpiVisR
-Title: Visualization of Epigenetic Patterns
+Title: A Tool for Exploratory Data Analysis and Visualisation within EWAS
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Stefan",
@@ -36,5 +36,8 @@ Imports:
     utils,
     htmltools
 Suggests: 
+    rmarkdown,
+    knitr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
