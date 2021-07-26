@@ -16,3 +16,6 @@ install_github('SteRoe/EpiVisR')
 ## Usage
 
 Start the App using EpiVisR::EpiVisRApp()
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
