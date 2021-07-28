@@ -1,11 +1,10 @@
 default:
- betaFileName: "f:/roeder/methylation_transposed2.csv"
- MultiModProbesFileName: "y:/Gruppen/immu/Epigenetik/450k/MultiModalCpG.csv"
- nonVariableProbesFileName: "f:/roeder/nonVariableProbes.RDS" #"f:/roeder/nonVariableProbes.csv"
- traitFileName: "Z:/EWAS_Phthalate/LiNA_SSW34_phthalates_wo_Outliers_K_check.csv"
- genderFileName: "Y:/Home/roeder/daten/Forschungsplanung/Pheno_Long_Salas.csv" #file with gender information
- dataDir: "Z:/EWAS_Phthalate/all/"
- EWAScatalogFileName: "Y:/Home/roeder/daten/Forschungsplanung/EpiVisR_script/ewascatalog-results.txt/results.txt"
+ betaFileName: "./examples/methylation_example_short.csv"
+ MultiModProbesFileName: "./examples/MultiModalCpG_short.csv"
+ traitFileName: "./examples/traits_short.csv"
+ genderFileName: "./examples/gender_short.csv" #file with gender information
+ dataDir: "./examples/data/"
+ EWAScatalogFileName: "./examples/EWASCatalog.txt"
  baseURL_EWASDataHub: "https://bigd.big.ac.cn/ewas/datahub/probe/"
  baseURL_MRCEWASCatalog: "http://ewascatalog.org/?query="
  probeAttribut: "probeID"
