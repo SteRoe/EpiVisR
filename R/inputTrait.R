@@ -5,7 +5,7 @@ inputTrait_UI <- function(id){
   ns <- shiny::NS(id)
 
 #  htmltools::tagList(
-    shinyBS::bsCollapse(id = ns("collapse"), open = c(ns("Folder"),ns("Traits")), multiple = TRUE,
+    shinyBS::bsCollapse(id = ns("collapse"), open = c(ns("Folder"), ns("Traits")), multiple = TRUE,
       shinyBS::bsCollapsePanel(ns("Folder"),
         shiny::fluidRow(
           shiny::column(6, #style = "margin-top: 25px;", #align="center", id="txtinput",
@@ -18,14 +18,14 @@ inputTrait_UI <- function(id){
         ),
         shinyBS::bsCollapsePanel(ns("Traits"),
           shiny::tabsetPanel(
-            shiny::tabPanel("Long Select",
+            shiny::tabPanel("Long Selects",
               DT::dataTableOutput(ns("traits"))
               #shiny::actionButton(ns("btnSelectTraitLong"), label = "Select Trait")
             ),
             shiny::tabPanel("Short Select",
               shiny::fluidRow(
                 shiny::column(6,
-                  shiny::selectInput(ns("selSelectedTrait"),"trait","",selectize = FALSE)
+                  shiny::selectInput(ns("selSelectedTrait"), "trait", "", selectize = FALSE)
                 ),
                 shiny::column(6, style = "margin-top: 25px;",
                   shiny::actionButton(ns("btnSelectTraitShort"), label = "Select Trait")
@@ -53,22 +53,26 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
       selectedTrait <- shiny::reactiveValues(trait = "", traits = list()) #selectedTrait$trait: last single selected trait; selectedTrait$traits: list of all selected traits
       moduleVariables <- shiny::reactiveValues(traitsWithSummary = data.frame())
       print(paste0(Sys.time(), " finished creating reactive values."))
+      globalVariables$config$dataDir = replaceBackslashes(globalVariables$config$dataDir)
       shiny::updateTextInput(session, "directory", value = globalVariables$config$dataDir)
 #      shiny::observeEvent(input$btnReadFolder, { #ignoreInit = TRUE,
-      shiny::observeEvent(input$btnReadFolder, { #ignoreInit = TRUE,
-        print(paste0(Sys.time(), " fired btnReadFolder."))
-        sessionVariables$folder = input$directory
-        print(paste0(Sys.time(), " updateTraitsTable."))
-        updateTraitsTable(session, output, globalVariables, sessionVariables, moduleVariables)
-        print(paste0(Sys.time(), " finished updateTraitsTable."))
-      }, ignoreInit = TRUE, ignoreNULL = FALSE)
+      # shiny::observeEvent(input$btnReadFolder, { #ignoreInit = TRUE,
+      #   print(paste0(Sys.time(), " fired btnReadFolder."))
+      #   sessionVariables$folder = input$directory
+      #   print(paste0(Sys.time(), " updateTraitsTable."))
+      #   updateTraitsTable(session, output, globalVariables, sessionVariables, moduleVariables)
+      #   print(paste0(Sys.time(), " finished updateTraitsTable."))
+      # }, ignoreInit = TRUE, ignoreNULL = FALSE)
 
       shiny::observeEvent(input$directory, { #ignoreInit = TRUE,
         print(paste0(Sys.time(), " fired directory."))
+        directory = replaceBackslashes(input$directory)
+        shiny::updateTextInput(session, "directory", directory)
         sessionVariables$folder = input$directory
-        print(paste0(Sys.time(), " reading folder ", sessionVariables$folder))
+#        print(paste0(Sys.time(), " reading folder ", sessionVariables$folder))
+        print(paste0(Sys.time(), " reading folder ", globalVariables$config$dataDir))
         updateTraitsTable(session, output, globalVariables, sessionVariables, moduleVariables)
-        print(paste0(Sys.time(), " finished reading folder "))
+        print(paste0(Sys.time(), " finished reading folder."))
       }, ignoreInit = TRUE)
 
       shiny::observeEvent(input$traits_cell_clicked, {
@@ -112,7 +116,8 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   print(paste0(Sys.time(), " assign traitsDFLong."))
   tryCatch({
     print(paste0(Sys.time(), " getTraits."))
-    traits <- getTraits(globalVariables, sessionVariables$folder)
+#    traits <- getTraits(globalVariables, sessionVariables$folder)
+    traits <- getTraits(globalVariables, globalVariables$config$dataDir)
     }, error=function(err){
       message(Sys.time(), paste0("unable to read folder ", sessionVariables$folder))
   });
@@ -123,7 +128,9 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
     choices = traits
   )
   print(paste0(Sys.time(), " getTraitsWithSummary."))
-  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables, sessionVariables$folder)
+#  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables, sessionVariables$folder)
+  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables, globalVariables$config$dataDir)
+
   print(paste0(Sys.time(), " before renderDataTable."))
   output$traits <- DT::renderDataTable({
     id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)

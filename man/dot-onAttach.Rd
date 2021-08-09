@@ -13,8 +13,8 @@
 }
 \value{
 nothing
-.onAttach()
 }
 \description{
 very first function during package load
 }
+\keyword{internal}

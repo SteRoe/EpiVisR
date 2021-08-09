@@ -8,8 +8,9 @@ ui <- shinyUI(
     inputTrait_UI("trait"),
     shiny::actionButton("btnSelectTrait", label = "Select Trait"),
     plotManhattanVolcano_UI("M"),
+#    shiny::verbatimTextOutput("txtSelectedProbesOld", placeholder = TRUE),
+    shiny::textInput("txtSelectedProbes", "probeID", "", placeholder = TRUE),
     shiny::actionButton("btnSelectProbe", label = "Select Probe"),
-    shiny::verbatimTextOutput("txtSelectedProbes", placeholder = TRUE),
     shiny::tabsetPanel(
       shiny::tabPanel("Trait vs DNAm",
                       shiny::fluidRow(
@@ -26,6 +27,7 @@ ui <- shinyUI(
           DTCorrelatingProbes_UI("CorrProbes")
         )
       )
-    )
+    ),
+  shiny::verbatimTextOutput("txtdebug", placeholder = TRUE),
   )
 )

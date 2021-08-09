@@ -12,4 +12,4 @@ default:
  genderAttribut: "gender"
  genderFemaleValue: "w"
  genderMaleValue: "m"
- debugMode: FALSE
+ debugMode: TRUE

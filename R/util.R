@@ -9,10 +9,12 @@ utils::globalVariables(c("globalVariables", "debugMode"))
 #' @param libname library name
 #' @param pkgname package name
 #' @return nothing
+#' @keywords internal
+#' @noRd
 #' .onAttach()
 .onAttach <- function(libname, pkgname) {
   globalVariables <- list()
-  packageStartupMessage("start loading package")
+  base::packageStartupMessage("start loading package")
   base::loadNamespace("EpiVisR")
   base::packageStartupMessage("end loading package")
 }
@@ -81,6 +83,8 @@ EpiVisRApp <- function() {
 #' gets back the currently selected trait together with gender information and traitnames were replaced with filename compatible characters
 #' @param globalVariables contains all global available Objects
 #' @return data.frame
+#' @keywords internal
+#' @noRd
 # examples EpiVisR::getTraitsDFLong(globalVariables)
 getTraitsDFLong <- function(globalVariables) {
   if (dir.exists(globalVariables$config$dataDir)) {
@@ -91,6 +95,12 @@ getTraitsDFLong <- function(globalVariables) {
       rownames(traitDFLong) = traitDFLong[,globalVariables$config$mergeAttribut]
       colnames(traitDFLong)<-gsub(" ",".",colnames(traitDFLong)) # replace " " with "." for compatibility to filenames
       colnames(traitDFLong)<-gsub("-",".",colnames(traitDFLong)) # replace "-" with "." for compatibility to filenames
+    }, error=function(err){
+      errortext = paste0("unable to open trait file ", globalVariables$config$traitFileName)
+      message(errortext)
+      id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
+    });
+    tryCatch({
       genderFileName <- globalVariables$config$genderFileName
       Gender<-fread(file=genderFileName, sep="\t", dec=".", data.table = FALSE)
       Gender<-base::subset(Gender, select=c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut))
@@ -98,7 +108,7 @@ getTraitsDFLong <- function(globalVariables) {
       traitDFLong = base::merge(traitDFLong, Gender, by.x = globalVariables$config$mergeAttribut, by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
       return (traitDFLong)
     }, error=function(err){
-      errortext = paste0("unable open work folder ", globalVariables$folder)
+      errortext = paste0("unable to open gender file ", globalVariables$config$genderFileName)
       message(errortext)
       id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
     });
@@ -109,6 +119,8 @@ getTraitsDFLong <- function(globalVariables) {
 #' loads globally needed objects (methylation matrix with beta values, annotation, etc.)
 #' @param globalVariables contains all global available Objects
 #' @return globalVariables
+#' @keywords internal
+#' @noRd
 # examples EpiVisR::loadObjects(globalVariables)
 loadObjects <- function(globalVariables){
   if (dir.exists(globalVariables$config$dataDir)) {
@@ -137,13 +149,6 @@ loadObjects <- function(globalVariables){
 #    assign("MultiModProbes",MultiModProbes,envir=globalenv())
     beta <- removeMultiModelCpGFromBeta(beta,MultiModProbes)
 
-    # message(paste0(Sys.time(), " loading non-variable probeIDs."))
-    # nonVariableProbesFileName <- pkg.env$config$nonVariableProbesFileName
-    # nonVariableProbes <- fread(file = nonVariableProbesFileName,sep = "\t",dec = ".")
-    # nonVariableProbes <- readRDS(file = nonVariableProbesFileName)
-    # assign("nonVariableProbes",nonVariableProbes,envir=globalenv())
-    # message(paste0(Sys.time(), " removing non-variable probeIDs."))
-    # beta <- removeNonVariableProbes(beta,nonVariableProbes)
     globalVariables$beta = beta
 #    assign("beta",beta,envir=globalenv())
     print(paste0(Sys.time(), " transposing beta."))
@@ -176,14 +181,6 @@ loadObjects <- function(globalVariables){
   }
   return(globalVariables)
 }
-#
-# setBaseSciPen<-function(){
-#   options(scipen=-10, digits=5)
-# }
-#
-# resetSciPen<-function(){
-#   options(scipen=0, digits=7)
-# }
 
 #' winsorize
 #' performs winsorizing
@@ -192,6 +189,8 @@ loadObjects <- function(globalVariables){
 #' @param startVar variable to start with
 #' @param endVar variable to end at
 #' @return data.frame with winsorized variables
+#' @keywords internal
+#' @noRd
 #examples winsorize(df, 0.05, 10, 20)
 winsorize <- function(traitDF, trim, startVar, endVar) {
   i <- NULL
@@ -206,7 +205,14 @@ winsorize <- function(traitDF, trim, startVar, endVar) {
   }
   return (traitDF)
 }
-
+#' traitDF
+#' @param sessionVariables sessionVariables
+#' @param mergeAttribut mergeAttribut
+#' @param genderAttribut genderAttribut
+#' @return data.frame with trait data, merge attribute and gender attribute
+#' @keywords internal
+#' @noRd
+#examples traitDF(sessionVariables, "ID", "gender")
 traitDF <- function(sessionVariables, mergeAttribut, genderAttribut) {
   trait = sessionVariables$trait$trait
   df = sessionVariables$traitsDFLong[,c(mergeAttribut, genderAttribut, trait)]
@@ -217,14 +223,17 @@ traitDF <- function(sessionVariables, mergeAttribut, genderAttribut) {
 #' @param globalVariables globalVariables loads files with globally available information (beta, trait)
 #' @param sessionVariables sessionVariables
 #' @return data.frame with regression results
-# examples loadResultFile(globalVariables, 100)
+#' @keywords internal
+#' @noRd
+#examples loadResultFile(globalVariables, 100)
 loadResultFile<-function(globalVariables, sessionVariables){
   trait = sessionVariables$trait$trait
   if(!is.na(as.numeric(substr(trait,1,1)))) {
     trait = paste0("X",trait)
   }
 #  PHENO = addXToName(PHENO,firstPHENOVar,lastPHENOVar)
-  folder = sessionVariables$folder
+#  folder = sessionVariables$folder
+  folder = globalVariables$config$dataDir
   fileName <- paste0(folder,trait,".csv")
   if (globalVariables$config$debugMode == TRUE) {
     all.results <- fread(fileName, stringsAsFactors=FALSE, header=TRUE, sep="\t", nrows = 10000, data.table = FALSE)
@@ -256,9 +265,12 @@ loadResultFile<-function(globalVariables, sessionVariables){
 #' gets back the currently selected trait
 #' @param globalVariables contains all global available Objects
 #' @param sessionVariables contains all session objects
+#' @param significeBorder border for selecting cases
 #' @return data.frame
-# examples EpiVisR::getResultDataSingleTrait(globalVariables, sessionVariables, onlySignificant)
-getResultDataSingleTrait <- function(globalVariables, sessionVariables, onlySignificant = FALSE) {
+#' @keywords internal
+#' @noRd
+# examples getResultDataSingleTrait(globalVariables, sessionVariables, onlySignificant)
+getResultDataSingleTrait <- function(globalVariables, sessionVariables, significeBorder = 0.05) {
   id <- shiny::showNotification("Reading data...", duration = NULL, closeButton = FALSE)
   on.exit(shiny::removeNotification(id), add = TRUE)
   trait = sessionVariables$trait$trait
@@ -268,7 +280,8 @@ getResultDataSingleTrait <- function(globalVariables, sessionVariables, onlySign
 #    rownames(dat) <- rownames(dat)
     dat = dat[,1:7]
 # if there are too few cases, then filtering for significant values is the reason
-    dat = dat[dat$P_VAL <= 0.05,]
+#    dat = dat[dat$P_VAL <= 0.05,]
+    dat = dat[dat$P_VAL <= significeBorder,]
 #      dat = dat[dat$P_VAL <= 0.01,]
 #    }
     dat$DeltaMeth = round(dat$DeltaMeth, 5)
@@ -281,9 +294,11 @@ getResultDataSingleTrait <- function(globalVariables, sessionVariables, onlySign
 #' addLinkToEWASDataHub
 #' adds links to EWASDataHub to a data.frame as separate column
 #' @param df data.frame to which links should be added
-#' @param baseURL string describing link
+#' @param baseURL string describing link to be included
 #' @return data.frame
-# examples EpiVisR::addLinkToEWASDataHub(data.frame, baseURL)
+#' @keywords internal
+#' @noRd
+# examples addLinkToEWASDataHub(data.frame, baseURL)
 addLinkToEWASDataHub <- function(df, baseURL){
   #provide link to EWAS data hub
   # df = dplyr::mutate(df, probeID = stringr::str_replace_all(df$probeID, ' ', '%20'),
@@ -295,9 +310,11 @@ addLinkToEWASDataHub <- function(df, baseURL){
 #' addLinkToMRCEWASCatalog
 #' adds links to MRC EWAS catalog to a data.frame as separate column
 #' @param df data.frame to which links should be added
-#' @param baseURL string describing link
+#' @param baseURL string describing link to be included
 #' @return data.frame
-# examples EpiVisR::addLinkToMRCEWASCatalog(data.frame)
+#' @keywords internal
+#' @noRd
+# examples addLinkToMRCEWASCatalog(data.frame)
 addLinkToMRCEWASCatalog <- function(df, baseURL){
   #provide link to MRC EWAS catalog
   # df = dplyr::mutate(df, probeID = stringr::str_replace_all(df$probeID, ' ', '%20'),
@@ -309,8 +326,11 @@ addLinkToMRCEWASCatalog <- function(df, baseURL){
 #' addLinkToEWASDataHubToHeader
 #' adds links to EWAS data hub to a data.frame into first line
 #' @param df data.frame to which links should be added
+#' @param baseURL string describing link to be included
 #' @return data.frame
-# examples EpiVisR::addLinkToEWASDataHubToHeader(data.frame)
+#' @keywords internal
+#' @noRd
+# examples addLinkToEWASDataHubToHeader(data.frame)
 addLinkToEWASDataHubToHeader <- function(df, baseURL) {
   i <- NULL
   foreach(i=1:ncol(df)) %do% {
@@ -326,8 +346,11 @@ addLinkToEWASDataHubToHeader <- function(df, baseURL) {
 #' addLinkToMRCEWASCatalogToHeader
 #' adds links to MRC EWAS catalog to a data.frame into first line
 #' @param df data.frame to which links should be added
+#' @param baseURL string describing link to be included
 #' @return data.frame
-# examples EpiVisR::addLinkToMRCEWASCatalogToHeader(data.frame)
+#' @keywords internal
+#' @noRd
+# examples addLinkToMRCEWASCatalogToHeader(data.frame)
 addLinkToMRCEWASCatalogToHeader <- function(df, baseURL) {
   i <- NULL
   foreach(i=1:ncol(df)) %do% {
@@ -348,10 +371,12 @@ addLinkToMRCEWASCatalogToHeader <- function(df, baseURL) {
 
 #' removeMultiModelCpGFromBeta
 #' removes multimodal CpG from data.frame
-#' @param data.frame to which links should be added
+#' @param df data.frame to which links should be added
 #' @param multiModList list with multimodal CpG
 #' @return data.frame
-# examples EpiVisR::removeMultiModelCpGFromBeta(data.frame, multiModList)
+#' @keywords internal
+#' @noRd
+# examples removeMultiModelCpGFromBeta(data.frame, multiModList)
 removeMultiModelCpGFromBeta<-function(df, multiModList){
   #row.name to column
   df$CpGName<-rownames(df)
@@ -372,7 +397,9 @@ removeMultiModelCpGFromBeta<-function(df, multiModList){
 #' removes attributes type, target and meth.dye from data.frame
 #' @param a data.frame to which links should be added
 #' @return data.frame
-# examples EpiVisR::reducedAnnotation(data.frame)
+#' @keywords internal
+#' @noRd
+# examples reducedAnnotation(data.frame)
 #reducedAnnotation <- function(globalVariables){
 reducedAnnotation <- function(a){
 #  a = globalVariables$annotation
@@ -396,7 +423,9 @@ reducedAnnotation <- function(a){
 #' @param annotation data.frame to which links should be added
 #' @param df data.frame to which links should be added
 #' @return data.frame
-# examples EpiVisR::resultDataSingleScenarioWithAnnotation(data.frame)
+#' @keywords internal
+#' @noRd
+# examples resultDataSingleScenarioWithAnnotation(data.frame)
 resultDataSingleScenarioWithAnnotation <- function(annotation, df){
 #  a = reducedAnnotation(globalVariables)
   a = reducedAnnotation(annotation)
@@ -412,6 +441,12 @@ resultDataSingleScenarioWithAnnotation <- function(annotation, df){
   return (df)
 }
 
+#' resultDataSingleScenarioWithAnnotationEWAScatalogCount
+#' @param globalVariables
+#' @param df data.frame to which links should be added
+#' @return data.frame
+#' @keywords internal
+#' @noRd
 resultDataSingleScenarioWithAnnotationEWAScatalogCount <- function(globalVariables, df){
 #browser()
   df = dplyr::left_join(df, globalVariables$EWAScatalogCount, by = c("probeID" = "CpG"))
@@ -419,6 +454,11 @@ resultDataSingleScenarioWithAnnotationEWAScatalogCount <- function(globalVariabl
   return (df)
 }
 
+#' empty_plot
+#' @param title title for empty plot
+#' @return plot empty plot
+#' @keywords internal
+#' @noRd
 empty_plot <- function(title = NULL){
   plot <- plotly::plotly_empty(type = "scatter", mode = "markers") %>%
     plotly::config(
@@ -432,4 +472,14 @@ empty_plot <- function(title = NULL){
       )
     )
   return(plot)
+}
+
+replaceBackslashes <- function(directory) {
+  print(paste0(Sys.time(), " replace \\ in folder name ", directory, "."))
+  directory = gsub("\\\\","/",directory) # replace "\" with "/"
+  print(paste0(Sys.time(), " end with /."))
+  if (!grepl("/$",directory)) { #does not end with /
+    directory = paste0(directory,"/")
+  }
+  return(directory)
 }
