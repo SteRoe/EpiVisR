@@ -247,7 +247,7 @@ loadResultFile<-function(globalVariables, sessionVariables){
   all.results<-all.results[,1:7]
 #  all.results <- dplyr::left_join(all.results, globalVariables$annotation, by = c("probeID" = "name"))
 #  all.results <- base::merge(all.results, annotation, by.x = "probeID", by.y = "name", all.x = TRUE, all.y = TRUE)
-  all.results <- base::merge(all.results, globalVariables$annotation, by.x = "probeID", by.y = "name", all.x = TRUE, all.y = FALSE)
+  all.results <- base::merge(all.results, globalVariables$annotation, by.x = "probeID", by.y = "name", all.x = FALSE, all.y = FALSE) #was all.x = TRUE, all.y = FALSE)
   all.results <- stats::na.omit(all.results)
   all.results<-all.results[all.results$chromosome!="chrY",]
   all.results<-all.results[all.results$chromosome!="chrX",]

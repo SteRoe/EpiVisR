@@ -129,7 +129,7 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   )
   print(paste0(Sys.time(), " getTraitsWithSummary."))
 #  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables, sessionVariables$folder)
-  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables, globalVariables$config$dataDir)
+  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables = globalVariables, directory = globalVariables$config$dataDir, exludeMultiModalProbes = TRUE)
 
   print(paste0(Sys.time(), " before renderDataTable."))
   output$traits <- DT::renderDataTable({
@@ -167,7 +167,7 @@ getTraits<-function(globalVariables, directory){
   }
 }
 
-getTraitsWithSummary <- function(globalVariables, directory){
+getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalProbes = TRUE){
 #  if (isTruthy(directory)) {
   print(paste0(Sys.time(), " start reading traits"))
   if (dir.exists(directory)) {
@@ -208,6 +208,13 @@ getTraitsWithSummary <- function(globalVariables, directory){
                 print(paste0(Sys.time(), " reading trait file ", fileName))
 
                 all.results <- data.table::fread(fileName, stringsAsFactors = FALSE, header = TRUE, sep = "\t", data.table = FALSE)
+
+                if (exludeMultiModalProbes == TRUE) {
+                  #merge with annotation and exclude multimodal probes...
+                  all.results <- base::merge(all.results, globalVariables$annotation, by.x = "probeID", by.y = "name", all.x = FALSE, all.y = FALSE)
+                  all.results = all.results[,1:16]
+                }
+
                 testthat::expect_type(all.results, "list")
                 all.results = all.results[order(all.results$N,decreasing = TRUE),]
                 tr$MaxN = all.results$N[1]
