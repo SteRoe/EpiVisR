@@ -41,10 +41,6 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
     DeltaMeth = sessionVariables$resultDataSingleTrait$DeltaMeth[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
 
     #merge with pheno
-<<<<<<< HEAD
-=======
-#    plotData = base::merge(beta_single, traitVar, by.x = config$mergeAttribut, by.y = config$mergeAttribut, all.x = FALSE, all.y=FALSE)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     plotData = base::merge(beta_single, traitVar, by.x = "ID", by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
     plotData <- stats::na.omit(plotData)
     gender <- "factor(gender)"

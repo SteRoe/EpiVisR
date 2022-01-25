@@ -2,17 +2,9 @@ server <- function(input, output, session) {
   globalVariables <- list()
   print(paste0(Sys.time(), " loading configuration."))
   globalVariables$config <- config::get(file = "config.yml")
-<<<<<<< HEAD
 #  output$txtdebug <- shiny::renderText(globalVariables$config$debugMode)
   #  checkconfigVariables()
   sessionVariables <- shiny::reactiveValues(folder = "", trait = list(), probe = list(), df_plot = data.frame(), resultDataSingleTrait = data.frame(), traitDF = data.frame())
-=======
-  output$txtdebug <- shiny::renderText(globalVariables$config$debugMode)
-  #  checkconfigVariables()
-  #  sessionVariables <- reactiveValues(folder = "", dataFileName = "", trait = list(), probe = list(), df_plot = data.frame(), resultDataSingleTrait = data.frame(), traitDF = data.frame(), traitsDFLong = data.frame())
-  sessionVariables <- shiny::reactiveValues(folder = "", trait = list(), probe = list(), df_plot = data.frame(), resultDataSingleTrait = data.frame(), traitDF = data.frame())
-#  sessionVariables$dataFileName = globalVariables$config$traitFileName
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 
   print(paste0(Sys.time(), " loading objects."))
   globalVariables = loadObjects(globalVariables)
@@ -38,26 +30,12 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$btnSelectProbe, ignoreInit = TRUE, {
     if (shiny::isTruthy(sessionVariables$probe$probe)) {
       shiny::updateTextInput(session, "txtSelectedProbes", value = sessionVariables$probe$probe)
-<<<<<<< HEAD
 
-=======
-      # print(paste0(Sys.time(), " plotting trait DNAm."))
-      # plotTraitDNAm_SERVER("TraitDNAm", globalVariables, sessionVariables)
-      # print(paste0(Sys.time(), " plotting DNAm profile."))
-      # plotDNAmProfile_SERVER("DNAmProfile", globalVariables, sessionVariables)
-      # print(paste0(Sys.time(), " plotting correlating probes."))
-      # DTCorrelatingProbes_SERVER("CorrProbes", globalVariables, sessionVariables)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     }
   })
   shiny::observeEvent(input$txtSelectedProbes, ignoreInit = FALSE, {
     if (shiny::isTruthy(input$txtSelectedProbes)) {
       sessionVariables$probe$probe = input$txtSelectedProbes
-<<<<<<< HEAD
-=======
-#      output$txtSelectedProbesOld <- shiny::renderText(sessionVariables$probe$probe)
-#      shiny::updateTextInput(session, "txtSelectedProbes", value = sessionVariables$probe$probe)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
       print(paste0(Sys.time(), " plotting trait DNAm."))
       plotTraitDNAm_SERVER("TraitDNAm", globalVariables, sessionVariables)
       print(paste0(Sys.time(), " plotting DNAm profile."))

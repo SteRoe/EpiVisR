@@ -10,10 +10,6 @@ utils::globalVariables(c("globalVariables", "debugMode"))
 #' @param pkgname package name
 #' @return nothing
 #' @keywords internal
-<<<<<<< HEAD
-=======
-#' @noRd
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' .onAttach()
 .onAttach <- function(libname, pkgname) {
   globalVariables <- list()
@@ -129,10 +125,6 @@ loadObjects <- function(globalVariables){
   if (dir.exists(globalVariables$config$dataDir)) {
     print(paste0(Sys.time(), " load beta."))
     betaFileName <- globalVariables$config$betaFileName
-<<<<<<< HEAD
-=======
-#browser()
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     if (globalVariables$config$debugMode == FALSE) {
       beta <- data.table::fread(betaFileName, stringsAsFactors=FALSE, header=TRUE, sep="\t", data.table = FALSE)
     }
@@ -141,24 +133,13 @@ loadObjects <- function(globalVariables){
     }
     beta <- as.data.frame(beta)
 #    beta<-data.frame(column_to_rownames(beta, var = "PROBEID"))
-<<<<<<< HEAD
 #    rownames(beta) <- beta$probeID
     rownames(beta) <- beta[,globalVariables$config$probeAttribut]
     beta[,globalVariables$config$probeAttribut] <-NULL
-=======
-    rownames(beta) <- beta$PROBEID
-    beta$PROBEID <- NULL
-    # message(paste0(Sys.time(), " remove outliers from beta."))
-    # beta_wo_outliers<-removeOutliers3IQR(as.matrix(beta))
-    # beta_wo_outliers<-as.data.frame(beta_wo_outliers[[1]])
-    # beta<-beta_wo_outliers
-
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     #load list of multimodal CpG
     print(paste0(Sys.time(), " load multimodal probes."))
     MultiModProbesFileName <- globalVariables$config$MultiModProbesFileName
     MultiModProbes<-fread(file=MultiModProbesFileName, sep="\t", dec=".", data.table = FALSE)
-<<<<<<< HEAD
     if (!nrow(removeMultiModeCpGFromBeta(beta,MultiModProbes)) == 0) {
       beta <- removeMultiModeCpGFromBeta(beta,MultiModProbes)
     }
@@ -171,28 +152,10 @@ loadObjects <- function(globalVariables){
     #colnames(beta.t) #check
     #rownames(beta.t) #check
     globalVariables$beta.t = beta.t
-=======
-#    assign("MultiModProbes",MultiModProbes,envir=globalenv())
-    beta <- removeMultiModelCpGFromBeta(beta,MultiModProbes)
-
-    globalVariables$beta = beta
-#    assign("beta",beta,envir=globalenv())
-    print(paste0(Sys.time(), " transposing beta."))
-    beta.t<-t(beta)
-    rownames(beta)
-    colnames(beta)
-    colnames(beta.t) <- rownames(beta)
-    colnames(beta.t)
-    rownames(beta.t)
-    globalVariables$beta.t = beta.t
-#    assign("beta.t",beta.t,envir=globalenv())
-
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     print(paste0(Sys.time(), " load annotation."))
     annotation <- meffil::meffil.get.features("450k")
     annotation$relation.to.island = as.factor(annotation$relation.to.island)
     #remove unmeasured or multimodal probeIDs from annotation
-<<<<<<< HEAD
     #annotation = annotation[which(annotation$name %in% rownames(beta)),]
     globalVariables$annotation = annotation
     print(paste0(Sys.time(), " Load EWAS catalog."))
@@ -210,26 +173,10 @@ loadObjects <- function(globalVariables){
     colnames(EWAScatalogCount)[2] = "n"
     globalVariables$EWAScatalogCount = EWAScatalogCount
     print(paste0(Sys.time(), " Done calculating EWASCatalogCount."))
-=======
-    annotation = annotation[which(annotation$name %in% rownames(beta)),]
-    globalVariables$annotation = annotation
-#    assign("annotation",annotation,envir=globalenv())
-    print(paste0(Sys.time(), " load EWAS catalog."))
-    EWAScatalogFileName <- globalVariables$config$EWAScatalogFileName
-    EWAScatalog = fread(file=EWAScatalogFileName, sep = "\t", data.table = FALSE)
-    globalVariables$EWAScatalog = EWAScatalog
-#    assign("EWAScatalog",EWAScatalog,envir=globalenv())
-#    usethis::use_pipe()
-    EWAScatalogCount = EWAScatalog %>% dplyr::group_by(CpG) %>% dplyr::tally(!is.na(CpG))
-#    EWAScatalogCount = EWAScatalog %>% dplyr::group_by(EWAScatalog$CpG) %>% dplyr::tally(!is.na(EWAScatalog$CpG))
-    globalVariables$EWAScatalogCount = EWAScatalogCount
-#    assign("EWAScatalogCount",EWAScatalogCount,envir=globalenv())
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   }
   return(globalVariables)
 }
 
-<<<<<<< HEAD
 #' readTxtGzFromURL
 #' reads structured txt file from URL, sep="\t", dec="."
 #' @param URL URL to be used
@@ -243,8 +190,6 @@ readTxtGzFromURL <- function(URL) {
   return(utils::read.csv(textConnection(txt),sep="\t",dec="."))
 }
 
-=======
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' winsorize
 #' performs winsorizing
 #' @param traitDF data.frame to be used
@@ -288,10 +233,6 @@ traitDF <- function(sessionVariables, mergeAttribut, genderAttribut) {
 #' @return data.frame with regression results
 #' @keywords internal
 #' @noRd
-<<<<<<< HEAD
-=======
-#examples loadResultFile(globalVariables, 100)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 loadResultFile<-function(globalVariables, sessionVariables){
   trait = sessionVariables$trait$trait
   if(!is.na(as.numeric(substr(trait,1,1)))) {
@@ -307,17 +248,8 @@ loadResultFile<-function(globalVariables, sessionVariables){
   else {
     all.results <- fread(fileName, stringsAsFactors=FALSE, header=TRUE, sep="\t", data.table = FALSE)
   }
-<<<<<<< HEAD
   all.results<-setcolorder(all.results, c("probeID","BETA","SE", "P_VAL", "FDR","DeltaMeth","N"))
   all.results<-all.results[,1:7]
-=======
-#  all.results<-setcolorder(all.results, c("probeID","BETA","SE", "P_VAL", "FDR","DeltaMeth","N","Outlying","Skewed","Clumpy","Sparse","Striated","Convex","Skinny","Stringy","Monotonic","scagnosticsScore2"))
-#  all.results<-all.results[,1:16]
-  all.results<-setcolorder(all.results, c("probeID","BETA","SE", "P_VAL", "FDR","DeltaMeth","N"))
-  all.results<-all.results[,1:7]
-#  all.results <- dplyr::left_join(all.results, globalVariables$annotation, by = c("probeID" = "name"))
-#  all.results <- base::merge(all.results, annotation, by.x = "probeID", by.y = "name", all.x = TRUE, all.y = TRUE)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   all.results <- base::merge(all.results, globalVariables$annotation, by.x = "probeID", by.y = "name", all.x = FALSE, all.y = FALSE) #was all.x = TRUE, all.y = FALSE)
   all.results <- stats::na.omit(all.results)
   all.results<-all.results[all.results$chromosome!="chrY",]
@@ -326,12 +258,8 @@ loadResultFile<-function(globalVariables, sessionVariables){
   all.results$mLog10P_VAL = log10(all.results$P_VAL) * -1
   all.results<-all.results[order(all.results$mLog10P_VAL),]
   #duplicated(all.results$probeID)
-<<<<<<< HEAD
   #rownames(all.results)<-all.results$probeID
   rownames(all.results)<-all.results[,globalVariables$config$probeAttribut]
-=======
-  rownames(all.results)<-all.results$probeID
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   #in case DeltaMeth does not match BETA
 #  all.results$DeltaMeth[(all.results$BETA < 0 & all.results$DeltaMeth > 0)] <- all.results$DeltaMeth*-1
   return(all.results)
@@ -341,20 +269,12 @@ loadResultFile<-function(globalVariables, sessionVariables){
 #' gets back the currently selected trait
 #' @param globalVariables contains all global available Objects
 #' @param sessionVariables contains all session objects
-<<<<<<< HEAD
 #' @param significanceBorder border for selecting cases
-=======
-#' @param significeBorder border for selecting cases
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' @return data.frame
 #' @keywords internal
 #' @noRd
 # examples getResultDataSingleTrait(globalVariables, sessionVariables, onlySignificant)
-<<<<<<< HEAD
 getResultDataSingleTrait <- function(globalVariables, sessionVariables, significanceBorder = 0.05) {
-=======
-getResultDataSingleTrait <- function(globalVariables, sessionVariables, significeBorder = 0.05) {
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   id <- shiny::showNotification("Reading data...", duration = NULL, closeButton = FALSE)
   on.exit(shiny::removeNotification(id), add = TRUE)
   trait = sessionVariables$trait$trait
@@ -365,7 +285,6 @@ getResultDataSingleTrait <- function(globalVariables, sessionVariables, signific
     dat = dat[,1:7]
 # if there are too few cases, then filtering for significant values is the reason
 #    dat = dat[dat$P_VAL <= 0.05,]
-<<<<<<< HEAD
     if (!nrow(dat[dat$P_VAL <= significanceBorder,]) < 1)
     {
       dat = dat[dat$P_VAL <= significanceBorder,]
@@ -374,14 +293,6 @@ getResultDataSingleTrait <- function(globalVariables, sessionVariables, signific
     dat$DeltaMeth = round(dat$DeltaMeth, 5)
     dat <- addLinkToEWASDataHub(dat, globalVariables$config$baseURL_EWASDataHub, globalVariables$config$probeAttribut)
     dat <- addLinkToMRCEWASCatalog(dat, globalVariables$config$baseURL_MRCEWASCatalog, globalVariables$config$probeAttribut)
-=======
-    dat = dat[dat$P_VAL <= significeBorder,]
-#      dat = dat[dat$P_VAL <= 0.01,]
-#    }
-    dat$DeltaMeth = round(dat$DeltaMeth, 5)
-    dat <- addLinkToEWASDataHub(dat, globalVariables$config$baseURL_EWASDataHub)
-    dat <- addLinkToMRCEWASCatalog(dat, globalVariables$config$baseURL_MRCEWASCatalog)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     return (dat)
   }
 }
@@ -390,25 +301,14 @@ getResultDataSingleTrait <- function(globalVariables, sessionVariables, signific
 #' adds links to EWASDataHub to a data.frame as separate column
 #' @param df data.frame to which links should be added
 #' @param baseURL string describing link to be included
-<<<<<<< HEAD
 #' @param probeAttribut string describing the name of the probe variable
-=======
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' @return data.frame
 #' @keywords internal
 #' @noRd
 # examples addLinkToEWASDataHub(data.frame, baseURL)
-<<<<<<< HEAD
 addLinkToEWASDataHub <- function(df, baseURL, probeAttribut){
   #provide link to EWAS data hub
   df$EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, df$probeID, '>', df[,probeAttribut],'</a>' )
-=======
-addLinkToEWASDataHub <- function(df, baseURL){
-  #provide link to EWAS data hub
-  # df = dplyr::mutate(df, probeID = stringr::str_replace_all(df$probeID, ' ', '%20'),
-  #           EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_EWASDataHub, probeID, '>', df$probeID,'</a>' ))
-  df$EWASDataHub = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, df$probeID, '>', df$probeID,'</a>' )
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   return(df)
 }
 
@@ -416,25 +316,14 @@ addLinkToEWASDataHub <- function(df, baseURL){
 #' adds links to MRC EWAS catalog to a data.frame as separate column
 #' @param df data.frame to which links should be added
 #' @param baseURL string describing link to be included
-<<<<<<< HEAD
 #' @param probeAttribut string describing the name of the probe variable
-=======
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' @return data.frame
 #' @keywords internal
 #' @noRd
 # examples addLinkToMRCEWASCatalog(data.frame)
-<<<<<<< HEAD
 addLinkToMRCEWASCatalog <- function(df, baseURL, probeAttribut){
   #provide link to MRC EWAS catalog
   df$MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, df$probeID, '>', df[,probeAttribut],'</a>' )
-=======
-addLinkToMRCEWASCatalog <- function(df, baseURL){
-  #provide link to MRC EWAS catalog
-  # df = dplyr::mutate(df, probeID = stringr::str_replace_all(df$probeID, ' ', '%20'),
-  #             MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', globalVariables$config$baseURL_MRCEWASCatalog, probeID, '>', df$probeID,'</a>' ))
-  df$MRCEWASCatalog = paste0('<a target=_blank rel="noopener noreferrer" href=', baseURL, df$probeID, '>', df$probeID,'</a>' )
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   return(df)
 }
 
@@ -478,24 +367,13 @@ addLinkToMRCEWASCatalogToHeader <- function(df, baseURL) {
   return(df)
 }
 
-<<<<<<< HEAD
 #' removeMultiModeCpGFromBeta
-=======
-# removeNonVariableProbes<-function(df,NonVariableProbesList){
-#   `%notin%` <- Negate(`%in%`)
-#   df = df[rownames(df) %notin% NonVariableProbesList,]
-#   return(df)
-# }
-
-#' removeMultiModelCpGFromBeta
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' removes multimodal CpG from data.frame
 #' @param df data.frame to which links should be added
 #' @param multiModList list with multimodal CpG
 #' @return data.frame
 #' @keywords internal
 #' @noRd
-<<<<<<< HEAD
 # examples removeMultiModeCpGFromBeta(data.frame, multiModList)
 removeMultiModeCpGFromBeta<-function(df, multiModList){
   #row.name to column
@@ -510,20 +388,6 @@ removeMultiModeCpGFromBeta<-function(df, multiModList){
   df$NormalP <- NULL
   rownames(df) <- df$CpGName
   df$CpGName <- NULL
-=======
-# examples removeMultiModelCpGFromBeta(data.frame, multiModList)
-removeMultiModelCpGFromBeta<-function(df, multiModList){
-  #row.name to column
-  df$CpGName<-rownames(df)
-  #merge
-  df <- base::merge(df, multiModList, by.x= "CpGName", by.y = "CpG")
-  #select only CpG with NumModes=1
-  df<-df[df$NumModes<2,]
-  df$NumModes<-NULL
-  df$NormalP<-NULL
-  rownames(df)<-df$CpGName
-  df$CpGName<-NULL
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   return(df)
 }
 
@@ -571,35 +435,19 @@ resultDataSingleScenarioWithAnnotation <- function(annotation, df){
   a$cpg.island.name = NULL
   a$relation.to.island = NULL
   a$snp.exclude = NULL
-<<<<<<< HEAD
   df = dplyr::left_join(df, a, by = c("probeID" = "name"))
-=======
-#browser()
-  df = dplyr::left_join(df, a, by = c("probeID" = "name"))
-#  df = base::merge(df, a, by.x = "probeID", by.y = "name", all.x = TRUE, all.y=FALSE)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   return (df)
 }
 
 #' resultDataSingleScenarioWithAnnotationEWAScatalogCount
-<<<<<<< HEAD
 #' @param globalVariables globalVariables
-=======
-#' @param globalVariables
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 #' @param df data.frame to which links should be added
 #' @return data.frame
 #' @keywords internal
 #' @noRd
 resultDataSingleScenarioWithAnnotationEWAScatalogCount <- function(globalVariables, df){
-<<<<<<< HEAD
   df = dplyr::left_join(df, globalVariables$EWAScatalogCount, by = c("probeID" = "CpG"))
   df$n[is.na(df$n)] = 1
-=======
-#browser()
-  df = dplyr::left_join(df, globalVariables$EWAScatalogCount, by = c("probeID" = "CpG"))
-# df = base::merge(df, globalVariables$EWAScatalogCount, by.x = "probeID", by.y = "CpG", all.x = TRUE, all.y=FALSE)
->>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   return (df)
 }
 
