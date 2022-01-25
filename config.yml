@@ -1,9 +1,9 @@
 default:
- betaFileName: "./inst/extdata/methylation_example_short.csv"
- MultiModProbesFileName: "./inst/extdata/MultiModalCpG_short.csv"
- traitFileName: "./inst/extdata/traits_short.csv"
- genderFileName: "./inst/extdata/gender_short.csv" #file with gender information
- dataDir: "./inst/extdata/traitdata/"
+ betaFileName: "./extdata/methylation_example_short.csv"
+ MultiModProbesFileName: "./extdata/MultiModalCpG_short.csv"
+ traitFileName: "./extdata/traits_short.csv"
+ genderFileName: "./extdata/gender_short.csv" #file with gender information
+ dataDir: "./extdata/traitdata/"
  EWAScatalogFileName: "http://ewascatalog.org/static//docs/ewascatalog-results.txt.gz"
  baseURL_EWASDataHub: "https://bigd.big.ac.cn/ewas/datahub/probe/"
  baseURL_MRCEWASCatalog: "http://ewascatalog.org/?query="
