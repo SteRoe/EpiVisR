@@ -4,6 +4,10 @@
 inputTrait_UI <- function(id){
   ns <- shiny::NS(id)
 
+<<<<<<< HEAD
+=======
+#  htmltools::tagList(
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     shinyBS::bsCollapse(id = ns("collapse"), open = c(ns("Folder"), ns("Traits")), multiple = TRUE,
       shinyBS::bsCollapsePanel(ns("Folder"),
         shiny::fluidRow(
@@ -11,12 +15,20 @@ inputTrait_UI <- function(id){
                  shiny::textInput(ns("directory"), "Folder for Traits", "", placeholder = TRUE)
           ),
           shiny::column(6, style = "margin-top: 25px;", #align="center", id="button",
+<<<<<<< HEAD
+=======
+#                 shiny::actionButton(ns("btnReadFolder"), label = "Select Folder")
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
                   shiny::verbatimTextOutput(ns("txtDataFile"), placeholder = TRUE)
           )
         ),
         shinyBS::bsCollapsePanel(ns("Traits"),
           shiny::tabsetPanel(
+<<<<<<< HEAD
             shiny::tabPanel("Long Select",
+=======
+            shiny::tabPanel("Long Selects",
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
               DT::dataTableOutput(ns("traits"))
               #shiny::actionButton(ns("btnSelectTraitLong"), label = "Select Trait")
             ),
@@ -41,6 +53,10 @@ inputTrait_UI <- function(id){
           )
         ), label = "")
       )
+<<<<<<< HEAD
+=======
+#  )
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 }
 
 inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
@@ -52,12 +68,27 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
       print(paste0(Sys.time(), " finished creating reactive values."))
       globalVariables$config$dataDir = replaceBackslashes(globalVariables$config$dataDir)
       shiny::updateTextInput(session, "directory", value = globalVariables$config$dataDir)
+<<<<<<< HEAD
+=======
+#      shiny::observeEvent(input$btnReadFolder, { #ignoreInit = TRUE,
+      # shiny::observeEvent(input$btnReadFolder, { #ignoreInit = TRUE,
+      #   print(paste0(Sys.time(), " fired btnReadFolder."))
+      #   sessionVariables$folder = input$directory
+      #   print(paste0(Sys.time(), " updateTraitsTable."))
+      #   updateTraitsTable(session, output, globalVariables, sessionVariables, moduleVariables)
+      #   print(paste0(Sys.time(), " finished updateTraitsTable."))
+      # }, ignoreInit = TRUE, ignoreNULL = FALSE)
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 
       shiny::observeEvent(input$directory, { #ignoreInit = TRUE,
         print(paste0(Sys.time(), " fired directory."))
         directory = replaceBackslashes(input$directory)
         shiny::updateTextInput(session, "directory", directory)
         sessionVariables$folder = input$directory
+<<<<<<< HEAD
+=======
+#        print(paste0(Sys.time(), " reading folder ", sessionVariables$folder))
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
         print(paste0(Sys.time(), " reading folder ", globalVariables$config$dataDir))
         updateTraitsTable(session, output, globalVariables, sessionVariables, moduleVariables)
         print(paste0(Sys.time(), " finished reading folder."))
@@ -98,11 +129,19 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   id <- shiny::showNotification("Filling data table...", duration = NULL, closeButton = FALSE)
   on.exit(shiny::removeNotification(id), add = TRUE)
   print(paste0(Sys.time(), " before renderText."))
+<<<<<<< HEAD
+=======
+#browser()
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   sessionVariables$traitsDFLong = getTraitsDFLong(globalVariables)
   output$txtDataFile = shiny::renderText(globalVariables$config$traitFileName) #(sessionVariables$dataFileName)
   print(paste0(Sys.time(), " assign traitsDFLong."))
   tryCatch({
     print(paste0(Sys.time(), " getTraits."))
+<<<<<<< HEAD
+=======
+#    traits <- getTraits(globalVariables, sessionVariables$folder)
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
     traits <- getTraits(globalVariables, globalVariables$config$dataDir)
     }, error=function(err){
       message(Sys.time(), paste0("unable to read folder ", sessionVariables$folder))
@@ -114,6 +153,10 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
     choices = traits
   )
   print(paste0(Sys.time(), " getTraitsWithSummary."))
+<<<<<<< HEAD
+=======
+#  moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables, sessionVariables$folder)
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables = globalVariables, directory = globalVariables$config$dataDir, exludeMultiModalProbes = TRUE)
 
   print(paste0(Sys.time(), " before renderDataTable."))
@@ -133,8 +176,15 @@ getTraits<-function(globalVariables, directory){
       fileNames=list()
       temp <- list.files(path=directory,pattern="\\.csv$")
       for (i in 1:length(temp)) {
+<<<<<<< HEAD
         firstlines <- data.table::fread(file = paste0(directory,as.character(temp[i])), sep="\t", header = T, nrows = 5, data.table = FALSE)
         testthat::expect_type(firstlines, "list")
+=======
+#        firstlines <- utils::read.table(file = paste0(directory,as.character(temp[i])), sep="\t", header = T, nrows = 5)
+        firstlines <- data.table::fread(file = paste0(directory,as.character(temp[i])), sep="\t", header = T, nrows = 5, data.table = FALSE)
+        testthat::expect_type(firstlines, "list")
+#        if (colnames(firstlines)[1] == "probeID") {
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
         if (colnames(firstlines)[1] == globalVariables$config$probeAttribut) {
           if (nrow(firstlines) >= 5) {
             fileName <- stringr::str_sub(temp[i], 1, stringr::str_length(temp[i])-4)
@@ -151,6 +201,10 @@ getTraits<-function(globalVariables, directory){
 }
 
 getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalProbes = TRUE){
+<<<<<<< HEAD
+=======
+#  if (isTruthy(directory)) {
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   print(paste0(Sys.time(), " start reading traits"))
   if (dir.exists(directory)) {
     traits <- data.frame(trait="ex", MaxN = 1, MinP_VAL = 0, MinFDR = 0, MaxBETA = 1, MaxDeltaMeth = 1, MinDeltaMeth = 1, MaxOutlying = 1, MinOutlying = 0, MaxSkewed = 1, MinSkewed = 0, MaxClumpy = 1, MinClumpy = 0, MaxSparse = 1, MinSparse = 0, MaxStriated = 1, MinStriated = 0, MaxConvex = 1, MinConvex = 0, MaxSkinny = 1, MinSkinny = 0, MaxStringy = 1, MinStringy = 0, MaxMonotonic = 1, MinMonotonic = 0)
@@ -179,8 +233,16 @@ getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalPro
         for (i in 1:max) {
           #firstlines <- utils::read.table(file = paste0(directory,as.character(temp[i])), sep = "\t", header = T, nrows = 5)
           firstlines <- data.table::fread(file = paste0(directory,as.character(temp[i])), sep = "\t", header = T, nrows = 5, data.table = FALSE)
+<<<<<<< HEAD
           if (colnames(firstlines)[1] == globalVariables$config$probeAttribut) {
             if (nrow(firstlines) >= 5) {
+=======
+#          if (colnames(firstlines)[1] == "probeID") {
+          if (colnames(firstlines)[1] == globalVariables$config$probeAttribut) {
+            if (nrow(firstlines) >= 5) {
+              if (grepl("adj", temp[i], fixed = TRUE) == FALSE) {
+
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
                 fileName <- stringr::str_sub(temp[i], 1, stringr::str_length(temp[i])-4)
                 tr$trait = fileName
                 fileName <- paste0(directory,fileName,".csv")
@@ -190,11 +252,16 @@ getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalPro
 
                 if (exludeMultiModalProbes == TRUE) {
                   #merge with annotation and exclude multimodal probes...
+<<<<<<< HEAD
                   print(paste0(Sys.time(), " before excluding multimodal probes"))
                   #all.results <- base::merge(all.results, globalVariables$annotation, by.x = "probeID", by.y = "name", all.x = FALSE, all.y = FALSE)
                   all.results <- base::merge(all.results, globalVariables$annotation, by.x = globalVariables$config$probeAttribut, by.y = "name", all.x = FALSE, all.y = FALSE)
                   all.results = all.results[,1:16]
                   print(paste0(Sys.time(), " finished excluding multimodal probes"))
+=======
+                  all.results <- base::merge(all.results, globalVariables$annotation, by.x = "probeID", by.y = "name", all.x = FALSE, all.y = FALSE)
+                  all.results = all.results[,1:16]
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
                 }
 
                 testthat::expect_type(all.results, "list")
@@ -209,6 +276,7 @@ getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalPro
                 all.results = all.results[order(all.results$DeltaMeth),]
                 tr$MaxDeltaMeth = max(all.results$DeltaMeth)
                 tr$MinDeltaMeth = min(all.results$DeltaMeth)
+<<<<<<< HEAD
                 tryCatch({
                   all.results = all.results[order(all.results$Outlying),]
                   tr$MaxOutlying = max(all.results$Outlying)
@@ -246,6 +314,39 @@ getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalPro
           else {
             message(paste0(Sys.time(), " attribut", globalVariables$config$probeAttribut, " from <config.yml> not found in data file ", temp[i] ))
           }
+=======
+                all.results = all.results[order(all.results$Outlying),]
+                tr$MaxOutlying = max(all.results$Outlying)
+                tr$MinOutlying = min(all.results$Outlying)
+                all.results = all.results[order(all.results$Skewed),]
+                tr$MaxSkewed = max(all.results$Skewed)
+                tr$MinSkewed = min(all.results$Skewed)
+                all.results = all.results[order(all.results$Clumpy),]
+                tr$MaxClumpy = max(all.results$Clumpy)
+                tr$MinClumpy = min(all.results$Clumpy)
+                all.results = all.results[order(all.results$Sparse),]
+                tr$MaxSparse = max(all.results$Sparse)
+                tr$MinSparse = min(all.results$Sparse)
+                all.results = all.results[order(all.results$Striated),]
+                tr$MaxStriated = max(all.results$Striated)
+                tr$MinStriated = min(all.results$Striated)
+                all.results = all.results[order(all.results$Convex),]
+                tr$MaxConvex = max(all.results$Convex)
+                tr$MinConvex = min(all.results$Convex)
+                all.results = all.results[order(all.results$Skinny),]
+                tr$MaxSkinny = max(all.results$Skinny)
+                tr$MinSkinny = min(all.results$Skinny)
+                all.results = all.results[order(all.results$Stringy),]
+                tr$MaxStringy = max(all.results$Stringy)
+                tr$MinStringy = min(all.results$Stringy)
+                all.results = all.results[order(all.results$Monotonic),]
+                tr$MaxMonotonic = max(all.results$Monotonic)
+                tr$MinMonotonic = min(all.results$Monotonic)
+                traits = rbind(traits, tr)
+              }
+            }
+          }
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
         }
         #remove dummy trait
         traits <- traits[-c(1), ]
@@ -263,4 +364,7 @@ getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalPro
     });
   }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80

@@ -53,8 +53,14 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
       value = min(250,nrow(sessionVariables$resultDataSingleTrait))
     )
     reDFManhattanVolcano <- shiny::reactive({getDFforManhattanVolcano(globalVariables, sessionVariables, input$numberResults)})
+<<<<<<< HEAD
     output$plotManhattan <- plotly::renderPlotly(plotlyManhattanVolcano(globalVariables,reDFManhattanVolcano(),"M"))
     output$plotVolcano <- plotly::renderPlotly(plotlyManhattanVolcano(globalVariables,reDFManhattanVolcano(),"V"))
+=======
+
+    output$plotManhattan <- plotly::renderPlotly(plotlyManhattanVolcano(reDFManhattanVolcano(),"M"))
+    output$plotVolcano <- plotly::renderPlotly(plotlyManhattanVolcano(reDFManhattanVolcano(),"V"))
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 
     output$dt <- DT::renderDataTable({
       id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
@@ -63,7 +69,11 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
         print(paste0(Sys.time(), " render data table Manhattan/ volcano."))
         DT::datatable(reDFManhattanVolcano(), escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
                       options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+<<<<<<< HEAD
       }, error = function(err) {
+=======
+      }, errror = function(err) {
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
         shiny::validate(shiny::need(nrow(df)>0,"No data to show"))
       })
     }, server = FALSE)
@@ -79,13 +89,21 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
         DT::datatable(data, extensions = 'Buttons', height = 400,
                       options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE,
                                      ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+<<<<<<< HEAD
       }, error = function(err) {
+=======
+      }, errror = function(err) {
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
         shiny::validate(shiny::need(nrow(df)>0,"No data to show"))
       })
     })
 
     shiny::observeEvent(plotly::event_data("plotly_click", source = "plotlyManhattan"), suspended = FALSE, {
+<<<<<<< HEAD
       sessionVariables$probe$probe <- as.character(plotly::event_data("plotly_click", source = "plotlyManhattan")$key[1])
+=======
+      sessionVariables$probe$probe <- plotly::event_data("plotly_click", source = "plotlyManhattan")$key
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
       id <- shiny::showNotification(paste0("Selected probe: ", sessionVariables$probe$probe), duration = NULL, closeButton = FALSE)
       on.exit(shiny::removeNotification(id), add = TRUE)
       output$txtSelectedProbe <- shiny::renderText(sessionVariables$probe$probe)
@@ -95,8 +113,12 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
       df = reDFManhattanVolcano()
       selected = input$dt_rows_selected
       if (length(selected)) {
+<<<<<<< HEAD
         #selectedProbeIDs <- df[selected,]$probeID
         selectedProbeIDs <- df[selected,globalVariables$config$probeAttribut]
+=======
+        selectedProbeIDs <- df[selected,]$probeID
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
         sessionVariables$probe$probe <- selectedProbeIDs[1]
         sessionVariables$probe$probes <- selectedProbeIDs
         output$txtSelectedProbe <- shiny::renderText(sessionVariables$probe$probe)
@@ -113,12 +135,19 @@ getDFforManhattanVolcano <- function(globalVariables, sessionVariables, n) {
   df <- df[1:n,]
   df <- resultDataSingleScenarioWithAnnotation(globalVariables$annotation, df)
   df <- resultDataSingleScenarioWithAnnotationEWAScatalogCount(globalVariables, df)
+<<<<<<< HEAD
   df=stats::na.omit(df,globalVariables$config$probeAttribut)
   return(df)
 }
 
 
 plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
+=======
+  return(df)
+}
+
+plotlyManhattanVolcano <- function(DF, M_V) {
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   tryCatch({
     print(paste0(Sys.time(), " plot manhattan / volcano."))
     if(missing(M_V)) M_V = "V"
@@ -132,8 +161,12 @@ plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
                                 marker = list(opacity = 0.5, sizemode = 'diameter'),
                                 size = DF$n,
                                 fill = ~'',
+<<<<<<< HEAD
                                 #text = paste0(DF$probeID,"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 text = paste0(DF[,globalVariables$config$probeAttribut],"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
+=======
+                                text = paste0(DF$probeID,"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
                                 hoverinfo = 'text', key = ~probeID)
       plot = plot %>% plotly::layout(xaxis = list(type = "lin"),
                              yaxis = list(type = "log", autorange = "reversed"))
@@ -145,8 +178,12 @@ plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
                                 marker = list(opacity = 0.5, sizemode = 'diameter'),
                                 size = DF$n,
                                 fill = ~'',
+<<<<<<< HEAD
                                 #text = paste0(DF$probeID,"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 text = paste0(DF[,globalVariables$config$probeAttribut],"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
+=======
+                                text = paste0(DF$probeID,"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
                                 hoverinfo = 'text', key = ~probeID)
       plot = plot %>% plotly::layout(xaxis = list(type = "lin", zeroline = FALSE, showline = TRUE,
                                           showticklabels = TRUE, showgrid = FALSE),

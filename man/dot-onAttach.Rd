@@ -17,5 +17,8 @@ nothing
 \description{
 very first function during package load
 }
+<<<<<<< HEAD
 \keyword{.onAttach()}
+=======
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
 \keyword{internal}

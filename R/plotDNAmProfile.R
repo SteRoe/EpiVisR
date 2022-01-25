@@ -51,7 +51,11 @@ getDMPNearRange <- function(globalVariables, sessionVariables, range) {
 
     rownames(traitDMPNearRangeData) = traitDMPNearRangeData$ID
   }, error=function(err){
+<<<<<<< HEAD
     print(paste0("unable find near range for ", DMP, " <-> ", trait, ". - ", err$message))
+=======
+    print(paste0("unable find near range for ", DMP, trait, ". - ", err$message))
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   });
   return(traitDMPNearRangeData)
 }

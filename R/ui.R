@@ -27,8 +27,13 @@ ui <- shinyUI(
           DTCorrelatingProbes_UI("CorrProbes")
         )
       )
+<<<<<<< HEAD
     )
 #,
 #  shiny::verbatimTextOutput("txtdebug", placeholder = TRUE),
+=======
+    ),
+  shiny::verbatimTextOutput("txtdebug", placeholder = TRUE),
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
   )
 )

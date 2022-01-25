@@ -1,10 +1,19 @@
 default:
+<<<<<<< HEAD
  betaFileName: "./inst/extdata/methylation_example_short.csv"
  MultiModProbesFileName: "./inst/extdata/MultiModalCpG_short.csv"
  traitFileName: "./inst/extdata/traits_short.csv"
  genderFileName: "./inst/extdata/gender_short.csv" #file with gender information
  dataDir: "./inst/extdata/traitdata/"
  EWAScatalogFileName: "Y:/Home/roeder/daten/Forschungsplanung/EWAS_methods/ewascatalog-results.txt/results.txt"
+=======
+ betaFileName: "./examples/methylation_example_short.csv"
+ MultiModProbesFileName: "./examples/MultiModalCpG_short.csv"
+ traitFileName: "./examples/traits_short.csv"
+ genderFileName: "./examples/gender_short.csv" #file with gender information
+ dataDir: "./examples/data/"
+ EWAScatalogFileName: "./examples/EWASCatalog.txt"
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
  baseURL_EWASDataHub: "https://bigd.big.ac.cn/ewas/datahub/probe/"
  baseURL_MRCEWASCatalog: "http://ewascatalog.org/?query="
  probeAttribut: "probeID"
@@ -12,4 +21,8 @@ default:
  genderAttribut: "gender"
  genderFemaleValue: "w"
  genderMaleValue: "m"
+<<<<<<< HEAD
  debugMode: FALSE
+=======
+ debugMode: TRUE
+>>>>>>> 293e544a2d61b0de48d77a832b4da81bba457b80
