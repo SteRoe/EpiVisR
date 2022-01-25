@@ -122,8 +122,10 @@ getTraitsDFLong <- function(globalVariables) {
 #' @noRd
 # examples EpiVisR::loadObjects(globalVariables)
 loadObjects <- function(globalVariables){
+browser()
   if (dir.exists(globalVariables$config$dataDir)) {
     print(paste0(Sys.time(), " load beta."))
+browser()
     betaFileName <- globalVariables$config$betaFileName
     if (globalVariables$config$debugMode == FALSE) {
       beta <- data.table::fread(betaFileName, stringsAsFactors=FALSE, header=TRUE, sep="\t", data.table = FALSE)

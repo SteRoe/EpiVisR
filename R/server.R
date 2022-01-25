@@ -1,8 +1,8 @@
 server <- function(input, output, session) {
   globalVariables <- list()
   print(paste0(Sys.time(), " loading configuration."))
-browser()
   packagePath <- find.package("EpiVisR", lib.loc=NULL, quiet = TRUE)
+browser()
   configFileName <- paste0(packagePath,"/","config.yml")
   #globalVariables$config <- config::get(file = "config.yml")
   globalVariables$config <- config::get(file = configFileName)
