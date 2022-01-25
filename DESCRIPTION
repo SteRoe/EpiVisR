@@ -1,0 +1,43 @@
+Package: EpiVisR
+Title: A Tool for Exploratory Data Analysis and Visualisation within EWAS
+Version: 0.1.0
+Authors@R: 
+    person(given = "Stefan",
+           family = "Röder",
+           role = c("aut", "cre"),
+           email = "stefan.roeder@ufz.de",
+           comment = c(ORCID = "0000-0001-9367-663X"))
+Description: Visualization of Epigenetic Patterns.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends: R (>= 4.1.0)
+Imports:
+    shiny (>= 1.6.0),
+    shinyBS,
+    DT (>= 0.18),
+    data.table (>= 1.14.0),
+    meffil (>= 1.1.2),
+    foreach (>= 1.5.1),
+    psych (>= 2.1.6),
+    dplyr (>= 1.0.7),
+    plotly (>= 4.9.4.1),
+    RColorBrewer (>= 1.1-2),
+    magick (>= 2.7.2),
+    config (>= 0.3.1),
+    magrittr,
+    stringr,
+    usethis,
+    broom,
+    graphics,
+    stats,
+    utils,
+    htmltools
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
