@@ -114,6 +114,29 @@ getTraitsDFLong <- function(globalVariables) {
   }
 }
 
+addPackagePathToConfig <- function(config, packagePath){
+  packagePath = paste0(packagePath, "/")
+  if (base::startsWith(config$betaFileName, "./")) {
+    config$betaFileName = stringr::str_replace(config$betaFileName, "./", packagePath)
+  }
+  if (base::startsWith(config$MultiModProbesFileName, "./")) {
+    config$MultiModProbesFileName = stringr::str_replace(config$MultiModProbesFileName, "./", packagePath)
+  }
+  if (base::startsWith(config$traitFileName, "./")) {
+    config$traitFileName = stringr::str_replace(config$traitFileName, "./", packagePath)
+  }
+  if (base::startsWith(config$genderFileName, "./")) {
+    config$genderFileName = stringr::str_replace(config$genderFileName, "./", packagePath)
+  }
+  if (base::startsWith(config$dataDir, "./")) {
+    config$dataDir = stringr::str_replace(config$dataDir, "./", packagePath)
+  }
+  if (base::startsWith(config$EWAScatalogFileName, "./")) {
+    config$EWAScatalogFileName = stringr::str_replace(config$EWAScatalogFileName, "./", packagePath)
+  }
+  return(config)
+}
+
 #' loadObjects
 #' loads globally needed objects (methylation matrix with beta values, annotation, etc.)
 #' @param globalVariables contains all global available Objects
@@ -122,10 +145,8 @@ getTraitsDFLong <- function(globalVariables) {
 #' @noRd
 # examples EpiVisR::loadObjects(globalVariables)
 loadObjects <- function(globalVariables){
-browser()
   if (dir.exists(globalVariables$config$dataDir)) {
     print(paste0(Sys.time(), " load beta."))
-browser()
     betaFileName <- globalVariables$config$betaFileName
     if (globalVariables$config$debugMode == FALSE) {
       beta <- data.table::fread(betaFileName, stringsAsFactors=FALSE, header=TRUE, sep="\t", data.table = FALSE)

@@ -2,10 +2,10 @@ server <- function(input, output, session) {
   globalVariables <- list()
   print(paste0(Sys.time(), " loading configuration."))
   packagePath <- find.package("EpiVisR", lib.loc=NULL, quiet = TRUE)
-browser()
   configFileName <- paste0(packagePath,"/","config.yml")
   #globalVariables$config <- config::get(file = "config.yml")
   globalVariables$config <- config::get(file = configFileName)
+  globalVariables$config <- addPackagePathToConfig(globalVariables$config, packagePath)
   sessionVariables <- shiny::reactiveValues(folder = "", trait = list(), probe = list(), df_plot = data.frame(), resultDataSingleTrait = data.frame(), traitDF = data.frame())
 
   print(paste0(Sys.time(), " loading objects."))
