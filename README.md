@@ -30,9 +30,10 @@ Point your working directory to the location with your files to visualize. This 
  genderFemaleValue  
  genderMaleValue  
 
-An example is given in the projects folder.  
+An example is given in the ./inst/extdata/ folder.
+Detailed explanations of data structures are in the vignette.
 setwd("your.working.directory")  
-Start the App using EpiVisR::EpiVisRApp()
+Start the App using: EpiVisR::EpiVisRApp()
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
