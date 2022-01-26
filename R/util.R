@@ -116,23 +116,23 @@ getTraitsDFLong <- function(globalVariables) {
 
 addPackagePathToConfig <- function(config, packagePath){
   packagePath = paste0(packagePath, "/")
-  if (base::startsWith(config$betaFileName, "./")) {
-    config$betaFileName = stringr::str_replace(config$betaFileName, "./", packagePath)
+  if (base::startsWith(config$betaFileName, "./inst/")) {
+    config$betaFileName = stringr::str_replace(config$betaFileName, "./inst/", packagePath)
   }
-  if (base::startsWith(config$MultiModProbesFileName, "./")) {
-    config$MultiModProbesFileName = stringr::str_replace(config$MultiModProbesFileName, "./", packagePath)
+  if (base::startsWith(config$MultiModProbesFileName, "./inst/")) {
+    config$MultiModProbesFileName = stringr::str_replace(config$MultiModProbesFileName, "./inst/", packagePath)
   }
-  if (base::startsWith(config$traitFileName, "./")) {
-    config$traitFileName = stringr::str_replace(config$traitFileName, "./", packagePath)
+  if (base::startsWith(config$traitFileName, "./inst/")) {
+    config$traitFileName = stringr::str_replace(config$traitFileName, "./inst/", packagePath)
   }
-  if (base::startsWith(config$genderFileName, "./")) {
-    config$genderFileName = stringr::str_replace(config$genderFileName, "./", packagePath)
+  if (base::startsWith(config$genderFileName, "./inst/")) {
+    config$genderFileName = stringr::str_replace(config$genderFileName, "./inst/", packagePath)
   }
-  if (base::startsWith(config$dataDir, "./")) {
-    config$dataDir = stringr::str_replace(config$dataDir, "./", packagePath)
+  if (base::startsWith(config$dataDir, "./inst/")) {
+    config$dataDir = stringr::str_replace(config$dataDir, "./inst/", packagePath)
   }
-  if (base::startsWith(config$EWAScatalogFileName, "./")) {
-    config$EWAScatalogFileName = stringr::str_replace(config$EWAScatalogFileName, "./", packagePath)
+  if (base::startsWith(config$EWAScatalogFileName, "./inst/")) {
+    config$EWAScatalogFileName = stringr::str_replace(config$EWAScatalogFileName, "./inst/", packagePath)
   }
   return(config)
 }
