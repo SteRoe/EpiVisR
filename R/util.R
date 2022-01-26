@@ -6,8 +6,10 @@ utils::globalVariables(c("globalVariables", "debugMode"))
 #' very first function
 #' @description very first function during package load
 #' @importFrom magrittr "%>%"
+#'
 #' @param libname library name
 #' @param pkgname package name
+#'
 #' @return nothing
 #' @keywords internal
 #' .onAttach()
@@ -19,10 +21,13 @@ utils::globalVariables(c("globalVariables", "debugMode"))
 }
 
 # very last function
-# @description very last function during package unload
-# @param libPath library path
-# @return nothing
+# description very last function during package unload
+# param libPath library path
+# return nothing
+# keywords internal
+# noRd
 # .onUnload <- function(libPath) {
+#   globalVariables <- NULL
 #   if (base::isNamespaceLoaded("EpiVisR")) {
 #     base::unloadNamespace("EpiVisR")
 #   }
@@ -78,13 +83,12 @@ EpiVisRApp <- function() {
 #   }
 # }
 
-#' getTraitsDFLong
 #' gets back the currently selected trait together with gender information and traitnames were replaced with filename compatible characters
+#'
 #' @param globalVariables contains all global available Objects
 #' @return data.frame
 #' @keywords internal
 #' @noRd
-# examples EpiVisR::getTraitsDFLong(globalVariables)
 getTraitsDFLong <- function(globalVariables) {
   if (dir.exists(globalVariables$config$dataDir)) {
     tryCatch({
@@ -143,7 +147,6 @@ addPackagePathToConfig <- function(config, packagePath){
 #' @return globalVariables
 #' @keywords internal
 #' @noRd
-# examples EpiVisR::loadObjects(globalVariables)
 loadObjects <- function(globalVariables){
   if (dir.exists(globalVariables$config$dataDir)) {
     print(paste0(Sys.time(), " load beta."))
@@ -201,12 +204,11 @@ loadObjects <- function(globalVariables){
 }
 
 #' readTxtGzFromURL
-#' reads structured txt file from URL, sep="\t", dec="."
+#' reads structured txt file from URL
 #' @param URL URL to be used
 #' @return data.frame with contents from URL
 #' @keywords internal
 #' @noRd
-#examples readTxtGzFromURL("http://ewascatalog.org/static/docs/ewascatalog-results.txt.gz")
 readTxtGzFromURL <- function(URL) {
   con <- base::gzcon(base::url(URL))
   txt <- base::readLines(con)
@@ -220,9 +222,9 @@ readTxtGzFromURL <- function(URL) {
 #' @param startVar variable to start with
 #' @param endVar variable to end at
 #' @return data.frame with winsorized variables
-#' @keywords internal
-#' @noRd
-#examples winsorize(df, 0.05, 10, 20)
+#' @examples
+#' EpiVisR::winsorize(df, 0.05, 10, 20)
+#' @export
 winsorize <- function(traitDF, trim, startVar, endVar) {
   i <- NULL
   foreach(i = startVar:endVar, .combine = cbind, .verbose=FALSE) %do% {
@@ -243,7 +245,6 @@ winsorize <- function(traitDF, trim, startVar, endVar) {
 #' @return data.frame with trait data, merge attribute and gender attribute
 #' @keywords internal
 #' @noRd
-#examples traitDF(sessionVariables, "ID", "gender")
 traitDF <- function(sessionVariables, mergeAttribut, genderAttribut) {
   trait = sessionVariables$trait$trait
   df = sessionVariables$traitsDFLong[,c(mergeAttribut, genderAttribut, trait)]
