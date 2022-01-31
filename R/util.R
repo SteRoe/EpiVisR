@@ -34,8 +34,8 @@ utils::globalVariables(c("globalVariables", "debugMode"))
 #   base::packageStartupMessage("end unloading package")
 # }
 
-#' starts the app
-#' @description function to start the app
+#' Starts the App
+#' @description Function to start the App. Details on how to work with this interactive package are given in the package vignette.
 #' @export
 EpiVisRApp <- function() {
   shiny::shinyApp(ui, server)
