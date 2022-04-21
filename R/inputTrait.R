@@ -15,30 +15,13 @@ inputTrait_UI <- function(id){
           )
         ),
         shinyBS::bsCollapsePanel(id = ns("Traits"), open = c(), multiple = TRUE,
-#          shiny::tabsetPanel(
           shiny::fluidRow(
-#            shiny::tabPanel("Long Select",
               DT::dataTableOutput(ns("traits"))
-              #shiny::actionButton(ns("btnSelectTraitLong"), label = "Select Trait")
-#            ),
-            # shiny::tabPanel("Short Select",
-            #   shiny::fluidRow(
-            #     shiny::column(6,
-            #       shiny::selectInput(ns("selSelectedTrait"), "trait", "", selectize = FALSE)
-            #     ),
-            #     shiny::column(6, style = "margin-top: 25px;",
-            #       shiny::actionButton(ns("btnSelectTraitShort"), label = "Select Trait")
-            #     )
-            #   )
-            # )
           ),
           shiny::fluidRow(
             shiny::column(6, htmltools::tags$html("last selected trait (check only)"),
                    shiny::verbatimTextOutput(ns("txtSelectedTrait"), placeholder = TRUE)
             )
-            # shiny::column(6, htmltools::tags$html("selected traits"),
-            #        shiny::verbatimTextOutput(ns("txtSelectedTraits"), placeholder = TRUE)
-            # )
           )
         ), label = "")
       )

@@ -178,29 +178,6 @@ readTxtGzFromURL <- function(URL) {
   return(utils::read.csv(textConnection(txt),sep="\t",dec="."))
 }
 
-#' winsorize
-#' performs winsorizing
-#' @param traitDF data.frame to be used
-#' @param trim value to be used for winsorizing
-#' @param startVar variable to start with
-#' @param endVar variable to end at
-#' @return data.frame with winsorized variables
-#' @examples
-#' EpiVisR::winsorize(df, 0.05, 10, 20)
-#' @export
-winsorize <- function(traitDF, trim, startVar, endVar) {
-  i <- NULL
-  foreach(i = startVar:endVar, .combine = cbind, .verbose=FALSE) %do% {
-    tryCatch({
-      if (is.numeric(traitDF[,i])){
-        traitDF[,i]<-psych::winsor(traitDF[,i],trim)
-      }
-    }, error=function(err){
-      print(paste0("Error: ", err$message))
-    })
-  }
-  return (traitDF)
-}
 #' traitDF
 #' @param sessionVariables sessionVariables
 #' @param mergeAttribut mergeAttribut
