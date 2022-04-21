@@ -1,6 +1,3 @@
-# library(shiny)
-# library(shinyBS)
-#
 inputTrait_UI <- function(id){
   ns <- shiny::NS(id)
 
@@ -16,11 +13,8 @@ inputTrait_UI <- function(id){
           shiny::column(2, style = "margin-top: 50px;",
                 shiny::actionButton(ns("btnSelectFolderFile"), label = "Select Data Folder & File")
           )
-#          shiny::column(3, style = "margin-top: 25px;", #align="center", id="button",
-#                  shiny::verbatimTextOutput(ns("txtDataFile"), placeholder = TRUE)
-#          )
         ),
-        shinyBS::bsCollapsePanel(ns("Traits"),
+        shinyBS::bsCollapsePanel(id = ns("Traits"), open = c(), multiple = TRUE,
 #          shiny::tabsetPanel(
           shiny::fluidRow(
 #            shiny::tabPanel("Long Select",
