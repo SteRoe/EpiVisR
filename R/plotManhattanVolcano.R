@@ -4,18 +4,18 @@ library(plotly)
 plotManhattanVolcano_UI <- function(id){
   ns <- shiny::NS(id)
   htmltools::tagList(
-    shiny::fluidRow(
-      shiny::verbatimTextOutput(ns("trait"), placeholder = TRUE)
-    ),
-    shinyBS::bsCollapse(id = "collapsePlot", open = c("plot"), multiple = TRUE,
-          shinyBS::bsCollapsePanel("plot", label = "Select Probe",
+#    shiny::fluidRow(
+#      shiny::verbatimTextOutput(ns("trait"), placeholder = TRUE)
+#    ),
+    shinyBS::bsCollapse(id = "collapsePlot", open = c("Manhattan plot"), multiple = TRUE,
+          shinyBS::bsCollapsePanel("Manhattan plot", label = "Select Probe",
             shiny::fluidRow(
               shiny::sliderInput(ns("numberResults"),"top n of results",
-                          10, 1000, 1000, 1, width = "100%")
+                          1, 1000, 1000, 1, width = "100%")
             ),
           shiny::tabsetPanel(
             shiny::tabPanel("Visualisation",
-#            fluidRow(
+#            shiny::fluidRow(
                 shiny::column(6, plotly::plotlyOutput(ns("plotManhattan"))),
                 shiny::column(6, plotly::plotlyOutput(ns("plotVolcano")))
 #            )
@@ -31,12 +31,7 @@ plotManhattanVolcano_UI <- function(id){
               )
             ),
             shiny::fluidRow(
-              shiny::column(6, htmltools::tags$html("last selected probe"),
-                     shiny::verbatimTextOutput(ns("txtSelectedProbe"), placeholder = TRUE)
-              ),
-              shiny::column(6, htmltools::tags$html("selected probes"),
-                     shiny::verbatimTextOutput(ns("txtSelectedProbes"), placeholder = TRUE)
-              )
+              shiny::verbatimTextOutput(ns("txtSelectedProbe"), placeholder = TRUE),
             )
           )
     )
@@ -62,7 +57,7 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
       tryCatch({
         print(paste0(Sys.time(), " render data table Manhattan/ volcano."))
         DT::datatable(reDFManhattanVolcano(), escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
-                      options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+                      options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv')))
       }, error = function(err) {
         shiny::validate(shiny::need(nrow(df)>0,"No data to show"))
       })
@@ -78,7 +73,7 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
         print(paste0(Sys.time(), " render data table pathway."))
         DT::datatable(data, extensions = 'Buttons', height = 400,
                       options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE,
-                                     ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv', 'excel','pdf')))
+                                     ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv')))
       }, error = function(err) {
         shiny::validate(shiny::need(nrow(df)>0,"No data to show"))
       })
@@ -88,7 +83,7 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
       sessionVariables$probe$probe <- as.character(plotly::event_data("plotly_click", source = "plotlyManhattan")$key[1])
       id <- shiny::showNotification(paste0("Selected probe: ", sessionVariables$probe$probe), duration = NULL, closeButton = FALSE)
       on.exit(shiny::removeNotification(id), add = TRUE)
-      output$txtSelectedProbe <- shiny::renderText(sessionVariables$probe$probe)
+      output$txtSelectedProbe <- shiny::renderText({sessionVariables$probe$probe})
     }, ignoreNULL = FALSE)
 
     shiny::observeEvent(input$dt_cell_clicked, {
@@ -100,7 +95,7 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
         sessionVariables$probe$probe <- selectedProbeIDs[1]
         sessionVariables$probe$probes <- selectedProbeIDs
         output$txtSelectedProbe <- shiny::renderText(sessionVariables$probe$probe)
-        output$txtSelectedProbes <- shiny::renderText(sessionVariables$probe$probes)
+#        output$txtSelectedProbes <- shiny::renderText(sessionVariables$probe$probes)
       }
     })
 

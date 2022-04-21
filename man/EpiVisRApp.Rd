@@ -2,10 +2,10 @@
 % Please edit documentation in R/util.R
 \name{EpiVisRApp}
 \alias{EpiVisRApp}
-\title{starts the app}
+\title{Starts the App}
 \usage{
 EpiVisRApp()
 }
 \description{
-function to start the app
+Function to start the App. Details on how to work with this interactive package are given in the package vignette.
 }

@@ -41,56 +41,15 @@ EpiVisRApp <- function() {
   shiny::shinyApp(ui, server)
 }
 
-# checkconfigVariables <- function(globalVariables) {
-#   if (is.null(globalVariables$config$firstPHENOVar)) {
-#     stop("firstPHENOVar missing")
-#   }
-#   if (is.null(globalVariables$config$lastPHENOVar)) {
-#     stop("lastPHENOVar missing")
-#   }
-#   if (is.null(globalVariables$config$AdjustFileName)) {
-#     stop("AdjustFileName missing")
-#   }
-#   if (is.null(globalVariables$config$betaFileName)) {
-#     stop("betaFileName missing")
-#   }
-#   if (is.null(globalVariables$config$EWAScatalogFileName)) {
-#     stop("EWAScatalogFileName missing")
-#   }
-#   if (is.null(globalVariables$config$MultiModProbesFileName)) {
-#     stop("multiModProbesFileName missing")
-#   }
-#   if (is.null(globalVariables$config$baseDir)) {
-#     stop("baseDir not set")
-#   }
-#   if (is.null(globalVariables$config$winsorTrim)) {
-#     stop("winsorTrim not set")
-#   }
-#   if (is.null(globalVariables$config$mergeAttribut)) {
-#     stop("mergeAttribut not set")
-#   }
-#   if (is.null(globalVariables$config$genderAttribut)) {
-#     stop("genderAttribut not set")
-#   }
-#   if (is.null(globalVariables$config$genderFemaleValue)) {
-#     stop("genderFemaleValue not set")
-#   }
-#   if (is.null(globalVariables$config$genderMaleValue)) {
-#     stop("genderMaleValue not set")
-#   }
-#   if (is.null(globalVariables$config$debugMode)) {
-#     stop("debugMode not set")
-#   }
-# }
-
 #' gets back the currently selected trait together with gender information and traitnames were replaced with filename compatible characters
 #'
 #' @param globalVariables contains all global available Objects
 #' @return data.frame
 #' @keywords internal
 #' @noRd
-getTraitsDFLong <- function(globalVariables) {
-  if (dir.exists(globalVariables$config$dataDir)) {
+getTraitsDFLong <- function(globalVariables, sessionVariables) {
+#  if (dir.exists(globalVariables$config$dataDir)) {
+  if (dir.exists(sessionVariables$folder)) {
     tryCatch({
       traitFileName = globalVariables$config$traitFileName #sessionVariables$dataFileName
       traitDFLong<-fread(file=traitFileName,sep="\t",dec=".",header=TRUE, data.table = FALSE)
@@ -120,6 +79,9 @@ getTraitsDFLong <- function(globalVariables) {
 
 addPackagePathToConfig <- function(config, packagePath){
   packagePath = paste0(packagePath, "/")
+  if (config$debugModeLocalInst == TRUE) {
+    packagePath = paste0(packagePath, "inst/")
+  }
   if (base::startsWith(config$betaFileName, "./inst/")) {
     config$betaFileName = stringr::str_replace(config$betaFileName, "./inst/", packagePath)
   }
@@ -149,6 +111,7 @@ addPackagePathToConfig <- function(config, packagePath){
 #' @noRd
 loadObjects <- function(globalVariables){
   if (dir.exists(globalVariables$config$dataDir)) {
+#  if (dir.exists(sessionVariables$folder)) {
     print(paste0(Sys.time(), " load beta."))
     betaFileName <- globalVariables$config$betaFileName
     if (globalVariables$config$debugMode == FALSE) {
@@ -263,8 +226,8 @@ loadResultFile<-function(globalVariables, sessionVariables){
     trait = paste0("X",trait)
   }
 #  PHENO = addXToName(PHENO,firstPHENOVar,lastPHENOVar)
-#  folder = sessionVariables$folder
-  folder = globalVariables$config$dataDir
+  folder = sessionVariables$folder
+#  folder = globalVariables$config$dataDir
   fileName <- paste0(folder,trait,".csv")
   if (globalVariables$config$debugMode == TRUE) {
     all.results <- fread(fileName, stringsAsFactors=FALSE, header=TRUE, sep="\t", nrows = 10000, data.table = FALSE)
