@@ -13,4 +13,4 @@ default:
  genderFemaleValue: "w"
  genderMaleValue: "m"
  debugMode: FALSE
- debugModeLocalInst: FALSE
+ debugModeLocalInst: TRUE

@@ -82,17 +82,33 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
                 df = as.data.frame(dfList[i])
                 fmla = stats::as.formula(paste0("`", colnames(df)[4], "` ~ `", colnames(df)[3], "`"))
                 m <- stats::lm(fmla, data = df)
-                plot = broom::augment(m,se_fit=TRUE) %>%
-                  plotly::plot_ly(x = stats::as.formula(paste0("~ `", colnames(df)[3], "`")), showlegend = FALSE)%>%
-                  plotly::add_markers(x = df[,3], y = df[,4], name = colnames(df)[4], showlegend = TRUE)%>%
+                plot <- broom::augment(m,se_fit=TRUE) %>%
+                  plotly::plot_ly(x = stats::as.formula(paste0("~ `", colnames(df)[3], "`")), showlegend = FALSE) %>%
+                  plotly::add_markers(x = df[,3], y = df[,4], name = colnames(df)[4], showlegend = TRUE) %>%
                   plotly::add_ribbons(ymin = ~.fitted - 1.96 * .se.fit,
                               ymax = ~.fitted + 1.96 * .se.fit,
-                              color = I("gray80"), showlegend = FALSE)%>%
-                  plotly::add_lines(y = ~.fitted, color = I("steelblue"), showlegend = FALSE)
-
+                              color = I("gray80"), showlegend = FALSE) %>%
+                  plotly::add_lines(y = ~.fitted, color = I("steelblue"), showlegend = FALSE) %>%
+                  plotly::layout(
+                    yaxis = list(title = '%', range = c(0,1))
+#                    yaxis = list(range = c(0,1))
+                  )
                 plotList = c(plotList,list(plot))
               }
-              plotlyscatter <- plotly::subplot(plotList, shareX = TRUE, nrows = length(dfList))
+              # m <- list(
+              #   l = 100,
+              #   r = 0,
+              #   b = 0,
+              #   t = 0
+              # )
+              plotlyscatter <- plotly::subplot(plotList, shareX = TRUE, shareY = TRUE, nrows = length(dfList)) %>%
+              # plotly::layout(autosize = T, margin = m) %>%
+              # plotly::layout(annotations = list(
+              #     list(x = -0.15, y = 0.5, text = "Methylation [%]",
+              #          xshift = -50,
+              #          textangle = 270,
+              #          showarrow = F, xref='paper', yref='paper', size=48)
+              #   ))
               return(plotlyscatter)
             }
           })

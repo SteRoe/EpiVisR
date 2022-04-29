@@ -1,8 +1,8 @@
 inputTrait_UI <- function(id){
   ns <- shiny::NS(id)
 
-    shinyBS::bsCollapse(id = ns("collapse"), open = c(ns("Data Folder and File"), ns("Traits")), multiple = TRUE,
-      shinyBS::bsCollapsePanel(ns("Data Folder and File"),
+    shinyBS::bsCollapse(id = ns("collapse"), open = c(ns("DataFolderandFilePanel"), ns("TraitsPanel")), multiple = TRUE,
+      shinyBS::bsCollapsePanel(ns("DataFolderandFilePanel"),
       shiny::fluidRow(
           shiny::column(5, style = "margin-top: 25px;",
                 shiny::textInput(ns("txtDirectory"), label = "Folder for Traits", value = "", placeholder = "folder with methylation .csv-files")
@@ -14,9 +14,11 @@ inputTrait_UI <- function(id){
                 shiny::actionButton(ns("btnSelectFolderFile"), label = "Select Data Folder & File")
           )
         ),
-        shinyBS::bsCollapsePanel(id = ns("Traits"), open = c(), multiple = TRUE,
+        shinyBS::bsCollapsePanel(id = ns("TraitsPanel"),
           shiny::fluidRow(
+            shiny::column(12, htmltools::tags$html(tags$body(h4('Traits for selection'))),
               DT::dataTableOutput(ns("traits"))
+            )
           ),
           shiny::fluidRow(
             shiny::column(6, htmltools::tags$html("last selected trait (check only)"),
@@ -47,7 +49,7 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
         globalVariables$config$traitFileName <- input$txtDataFile
         print(paste0(Sys.time(), " reading folder ", sessionVariables$folder)) #globalVariables$config$dataDir))
         updateTraitsTable(session, output, globalVariables, sessionVariables, moduleVariables)
-        print(paste0(Sys.time(), " finished reading folder."))
+        print(paste0(Sys.time(), " finished: reading folder."))
       }, ignoreInit = TRUE)
 
       # shiny::observeEvent(input$directory, { #ignoreInit = TRUE,
@@ -74,6 +76,7 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
           print(paste0(Sys.time(), " before renderText."))
           output$txtSelectedTrait <- shiny::renderText({sessionVariables$trait$trait})
 #          output$txtSelectedTraits = shiny::renderText({sessionVariables$trait$traits})
+          print(paste0(Sys.time(), " finished: select trait."))
         }
       }, ignoreInit = TRUE)
 

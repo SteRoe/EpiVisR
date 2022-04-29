@@ -8,10 +8,12 @@ plotManhattanVolcano_UI <- function(id){
 #      shiny::verbatimTextOutput(ns("trait"), placeholder = TRUE)
 #    ),
     shinyBS::bsCollapse(id = "collapsePlot", open = c("Manhattan plot"), multiple = TRUE,
-          shinyBS::bsCollapsePanel("Manhattan plot", label = "Select Probe",
+          shinyBS::bsCollapsePanel("Manhattan plot", label = "",
             shiny::fluidRow(
-              shiny::sliderInput(ns("numberResults"),"top n of results",
+              shiny::column(12, htmltools::tags$html(tags$body(h4('Select Probe'))),
+                shiny::sliderInput(ns("numberResults"),"top n of results",
                           1, 1000, 1000, 1, width = "100%")
+              )
             ),
           shiny::tabsetPanel(
             shiny::tabPanel("Visualisation",
@@ -143,7 +145,7 @@ plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
                                 #text = paste0(DF$probeID,"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 text = paste0(DF[,globalVariables$config$probeAttribut],"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 hoverinfo = 'text', key = ~probeID)
-      plot = plot %>% plotly::layout(xaxis = list(type = "lin", zeroline = FALSE, showline = TRUE,
+      plot = plot %>% plotly::layout(xaxis = list(title = 'DeltaMeth [%]', type = "lin", zeroline = FALSE, showline = TRUE,
                                           showticklabels = TRUE, showgrid = FALSE),
                              yaxis = list(type = "log", autorange = "reversed"))
     }

@@ -3,7 +3,7 @@ plotTraitDNAm_UI <- function(id){
   htmltools::tagList(
     shiny::fluidRow(
       plotly::plotlyOutput(ns("plotlyOneProbe"), height = 400),
-      plotly::plotlyOutput(ns("plotlyHorizontalViolin"), height = 100)
+      plotly::plotlyOutput(ns("plotlyHorizontalViolin"), height = 120)
     )
   )
 }
@@ -32,17 +32,19 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
     beta_single<-globalVariables$beta[probeID,]
     beta_single<-t(beta_single)
     beta_single<-(as.data.frame(beta_single))
-    beta_single$ID = rownames(beta_single)
+    beta_single$ID <- rownames(beta_single)
     #pick variable from traits dataframe
-    traitVar<-traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
-    traitName = sessionVariables$trait$trait
+    traitVar <- traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
+    traitName <- sessionVariables$trait$trait
     DMP = sessionVariables$probe$probe
-    P_VAL = sessionVariables$resultDataSingleTrait$P_VAL[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
-    DeltaMeth = sessionVariables$resultDataSingleTrait$DeltaMeth[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
+    P_VAL <- sessionVariables$resultDataSingleTrait$P_VAL[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
+    DeltaMeth <- sessionVariables$resultDataSingleTrait$DeltaMeth[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
 
     #merge with pheno
-    plotData = base::merge(beta_single, traitVar, by.x = "ID", by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
+    plotData <- base::merge(beta_single, traitVar, by.x = "ID", by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
     plotData <- stats::na.omit(plotData)
+    min <- min(plotData[4])
+    max <- max(plotData[4])
     gender <- "factor(gender)"
     plotDataFemale = subset(plotData, plotData$gender == globalVariables$config$genderFemaleValue)
     plotDataMale = subset(plotData, plotData$gender == globalVariables$config$genderMaleValue)
@@ -57,25 +59,35 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
                   color = I("gray80"), showlegend = FALSE)%>%
       plotly::add_lines(y = ~.fitted, color = I("steelblue"), showlegend = FALSE) %>%
       plotly::layout(
-        title = paste0(traitName, " vs. ", DMP, " P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth)
+        title = paste0(traitName, " vs. ", DMP, " P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
+        yaxis = list(title = 'Methylation [%]', range = c(0,1)),
+        xaxis = list(title = Name, range = c(min,max))
       )
     mFemale <- stats::lm(fmla, data = plotDataFemale)
-    plotFemale = broom::augment(mFemale,se_fit=TRUE) %>%
+    plotFemale <- broom::augment(mFemale,se_fit=TRUE) %>%
       plotly::plot_ly(x = stats::as.formula(paste0("~ `", Name, "`")), showlegend = FALSE) %>%
       plotly::add_markers(y = stats::as.formula(paste0("~ `", probeID, "`")), color = I("deeppink"), name = "female", showlegend = TRUE)%>%
       plotly::add_ribbons(ymin = ~.fitted - 1.96 * .se.fit,
                   ymax = ~.fitted + 1.96 * .se.fit,
                   color = I("gray80"), showlegend = FALSE)%>%
-      plotly::add_lines(y = ~.fitted, color = I("deeppink"), showlegend = FALSE)
+      plotly::add_lines(y = ~.fitted, color = I("deeppink"), showlegend = FALSE) %>%
+      plotly::layout(
+        yaxis = list(title = 'Methylation [%]', range = c(0,1)),
+        xaxis = list(title = Name, range = c(min,max))
+      )
     mMale <- stats::lm(fmla, data = plotDataMale)
-    plotMale = broom::augment(mMale,se_fit=TRUE) %>%
+    plotMale <- broom::augment(mMale,se_fit=TRUE) %>%
       plotly::plot_ly(x = stats::as.formula(paste0("~ `", Name, "`")), showlegend = FALSE) %>%
       plotly::add_markers(y = stats::as.formula(paste0("~ `", probeID, "`")), color = I("blue"), name = "male", showlegend = TRUE)%>%
       plotly::add_ribbons(ymin = ~.fitted - 1.96 * .se.fit,
                   ymax = ~.fitted + 1.96 * .se.fit,
                   color = I("gray80"), showlegend = FALSE)%>%
-      plotly::add_lines(y = ~.fitted, color = I("blue"), showlegend = FALSE)
-    plot = plotly::subplot(plot,plotFemale,plotMale,nrows=3)
+      plotly::add_lines(y = ~.fitted, color = I("blue"), showlegend = FALSE) %>%
+      plotly::layout(
+        yaxis = list(title = 'Methylation [%]', range = c(0,1)),
+        xaxis = list(title = Name, range = c(min,max))
+      )
+    plot = plotly::subplot(plot,plotFemale,plotMale,nrows=3, shareX = TRUE, shareY = TRUE)
     return(plot)
   }, error=function(err){
     message(paste0(Sys.time(), "unable to plot ", probeID, " vs. ", Name, "; ", err$message))
@@ -85,24 +97,34 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
 
 plotlyHorizontalViolin <- function(traitDF, femaleValue, maleValue) {
   tryCatch({
-    traitDF = stats::na.omit(traitDF)
+    traitDF <- stats::na.omit(traitDF)
+    min <- min(traitDF[,3])
+    max <- max(traitDF[,3])
     dens <- stats::density(traitDF[,3], bw = "sj")
     femaletraitDF = traitDF[traitDF$gender == femaleValue,]
     maletraitDF = traitDF[traitDF$gender == maleValue,]
     femaleDens <- stats::density(femaletraitDF[,3], bw = "sj")
     maleDens <- stats::density(maletraitDF[,3], bw = "sj")
-    plot = plotly::plot_ly()
-    plot = plot %>% plotly::add_trace(x = femaleDens$x, y = femaleDens$y, type = 'scatter', mode = 'spline', color = I('deeppink'), fill = 'tozeroy', name = 'female')
-    plot = plot %>% plotly::add_trace(x = maleDens$x, y = maleDens$y * -1, type = 'scatter', mode = 'spline', color = I('blue'), fill = 'tozeroy', name = 'male')
+    plot <- plotly::plot_ly()
+    plot <- plot %>% plotly::add_trace(x = femaleDens$x, y = femaleDens$y, type = 'scatter', mode = 'spline', color = I('deeppink'), fill = 'tozeroy', name = 'female')
+    plot <- plot %>% plotly::add_trace(x = maleDens$x, y = maleDens$y * -1, type = 'scatter', mode = 'spline', color = I('blue'), fill = 'tozeroy', name = 'male')
     #omit x axis
     ay <- list(
-      title = "",
-      zeroline = FALSE,
-      showline = FALSE,
-      showticklabels = FALSE,
-      showgrid = FALSE
+      title = 'Density'
+#      zeroline = FALSE,
+#      showline = FALSE,
+#      showticklabels = FALSE,
+#      showgrid = FALSE
     )
-    plot <- plot %>% plotly::layout(yaxis = ay)
+    ax <- list(
+      title = colnames(traitDF)[3],
+      range = c(min,max)
+#      zeroline = FALSE,
+#      showline = FALSE,
+#      showticklabels = FALSE,
+#      showgrid = FALSE
+    )
+    plot <- plot %>% plotly::layout(xaxis = ax, yaxis = ay)
     #    plot
     return (plot)
   }, error=function(err){
