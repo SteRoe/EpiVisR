@@ -12,7 +12,8 @@ plotManhattanVolcano_UI <- function(id){
             shiny::fluidRow(
               shiny::column(12, htmltools::tags$html(tags$body(h4('Select Probe'))),
                 shiny::sliderInput(ns("numberResults"),"top n of results",
-                          1, 1000, 1000, 1, width = "100%")
+                          1, 1000, 1000, 1, width = "100%"),
+                shinyBS::bsTooltip(id = ns("numberResults"), title = "limit number of results to top n %", placement = "right", trigger = "hover")
               )
             ),
           shiny::tabsetPanel(
@@ -59,7 +60,8 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
       tryCatch({
         print(paste0(Sys.time(), " render data table Manhattan/ volcano."))
         DT::datatable(reDFManhattanVolcano(), escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
-                      options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv')))
+                      options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
+        DT::formatSignif(2:6, digits = 2)
       }, error = function(err) {
         shiny::validate(shiny::need(nrow(df)>0,"No data to show"))
       })
@@ -75,7 +77,8 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
         print(paste0(Sys.time(), " render data table pathway."))
         DT::datatable(data, extensions = 'Buttons', height = 400,
                       options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE,
-                                     ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv')))
+                                     ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
+        DT::formatSignif(4, digits = 2)
       }, error = function(err) {
         shiny::validate(shiny::need(nrow(df)>0,"No data to show"))
       })
@@ -133,7 +136,7 @@ plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
                                 text = paste0(DF[,globalVariables$config$probeAttribut],"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 hoverinfo = 'text', key = ~probeID)
       plot = plot %>% plotly::layout(xaxis = list(type = "lin"),
-                             yaxis = list(type = "log", autorange = "reversed"))
+                             yaxis = list(type = "log", autorange = "reversed", exponentformat = "power", dtick = 3))
     }
     else {
       plot = plot %>% plotly::add_trace(x = ~DeltaMeth, y = ~P_VAL,
@@ -147,7 +150,7 @@ plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
                                 hoverinfo = 'text', key = ~probeID)
       plot = plot %>% plotly::layout(xaxis = list(title = 'DeltaMeth [%]', type = "lin", zeroline = FALSE, showline = TRUE,
                                           showticklabels = TRUE, showgrid = FALSE),
-                             yaxis = list(type = "log", autorange = "reversed"))
+                             yaxis = list(type = "log", autorange = "reversed", exponentformat = "power", dtick = 3))
     }
     return (plot)
   }, error=function(err){

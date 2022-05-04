@@ -51,12 +51,12 @@ getTraitsDFLong <- function(globalVariables, sessionVariables) {
 #  if (dir.exists(globalVariables$config$dataDir)) {
   if (dir.exists(sessionVariables$folder)) {
     tryCatch({
-      traitFileName = globalVariables$config$traitFileName #sessionVariables$dataFileName
-      traitDFLong<-fread(file=traitFileName,sep="\t",dec=".",header=TRUE, data.table = FALSE)
-      traitDFLong<-as.data.frame(traitDFLong)
-      rownames(traitDFLong) = traitDFLong[,globalVariables$config$mergeAttribut]
-      colnames(traitDFLong)<-gsub(" ",".",colnames(traitDFLong)) # replace " " with "." for compatibility to filenames
-      colnames(traitDFLong)<-gsub("-",".",colnames(traitDFLong)) # replace "-" with "." for compatibility to filenames
+      traitFileName <- globalVariables$config$traitFileName #sessionVariables$dataFileName
+      traitDFLong <- fread(file=traitFileName,sep="\t",dec=".",header=TRUE, data.table = FALSE)
+      traitDFLong <- as.data.frame(traitDFLong)
+      rownames(traitDFLong) <- traitDFLong[,globalVariables$config$mergeAttribut]
+      colnames(traitDFLong) <- gsub(" ",".",colnames(traitDFLong)) # replace " " with "." for compatibility to filenames
+      colnames(traitDFLong) <- gsub("-",".",colnames(traitDFLong)) # replace "-" with "." for compatibility to filenames
     }, error=function(err){
       errortext = paste0("unable to open trait file ", globalVariables$config$traitFileName)
       message(errortext)
@@ -64,10 +64,15 @@ getTraitsDFLong <- function(globalVariables, sessionVariables) {
     });
     tryCatch({
       genderFileName <- globalVariables$config$genderFileName
-      Gender<-fread(file=genderFileName, sep="\t", dec=".", data.table = FALSE)
-      Gender<-base::subset(Gender, select=c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut))
-      Gender = as.data.frame(Gender)
-      traitDFLong = base::merge(traitDFLong, Gender, by.x = globalVariables$config$mergeAttribut, by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
+      Gender <- fread(file=genderFileName, sep="\t", dec=".", data.table = FALSE)
+      Gender <- base::subset(Gender, select=c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut))
+      Gender <- as.data.frame(Gender)
+      if (nrow(Gender) != nrow(traitDFLong)) {
+        errortext = paste0("nrow(Gender)=", nrow(Gender), " does not match nrow(traitDFLong)=", nrow(traitDFLong),".")
+        message(errortext)
+        id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
+      }
+      traitDFLong <- base::merge(traitDFLong, Gender, by.x = globalVariables$config$mergeAttribut, by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
       return (traitDFLong)
     }, error=function(err){
       errortext = paste0("unable to open gender file ", globalVariables$config$genderFileName)

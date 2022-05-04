@@ -39,6 +39,7 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
       globalVariables$config$dataDir <- replaceBackslashes(globalVariables$config$dataDir)
       shiny::updateTextInput(session, "txtDirectory", value = globalVariables$config$dataDir)
       shiny::updateTextInput(session, "txtDataFile", value = globalVariables$config$traitFileName)
+
       shiny::observeEvent(input$btnSelectFolderFile, {
         print(paste0(Sys.time(), " fired directory."))
         directory <- replaceBackslashes(input$txtDirectory)
@@ -70,6 +71,11 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
           if (substr(selectedTrait$trait, 1, 1) == "X") {
             selectedTrait$trait<-gsub("X","",selectedTrait$trait) # remove "X" in traitname for compatibility to filenames
           }
+
+          # if (substr(selectedTrait$trait, nchar(selectedTrait$trait)-2, nchar(selectedTrait$trait)) == "adj") {
+          #   selectedTrait$trait<-gsub("adj","",selectedTrait$trait) # remove "adj" in traitname for compatibility to filenames
+          # }
+
           selectedTrait$traits <- moduleVariables$traitsWithSummary[input$traits_rows_selected,]$trait
           sessionVariables$trait <- selectedTrait
           shiny::validate(shiny::need(selectedTrait$trait,"Select at least one trait."))
@@ -111,10 +117,16 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   output$traits <- DT::renderDataTable({
     id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
     on.exit(shiny::removeNotification(id), add = TRUE)
-    DT::datatable(moduleVariables$traitsWithSummary, selection = "single", editable = FALSE, extensions = list("Scroller"), style = "bootstrap", class = "compact", width = "100%",
-              options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE))
+#browser()
+#    tableData <- moduleVariables$traitsWithSummary %>% dplyr::mutate_if(is.numeric, signif, digits = 3)
+    tableData <- moduleVariables$traitsWithSummary
+    DT::datatable(tableData, selection = "single", editable = FALSE, extensions = list("Scroller"), style = "bootstrap", class = "compact", width = "100%",
+              options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE)) %>%
+    DT::formatSignif(2:ncol(tableData), digits = 2)
   }, server = FALSE)
 }
+
+#%>% DT::formatSignif(c("MinP_Val", "MinFDR", "MaxDeltaMeth", "MaxOutlying", "MinOutlying", "MaxSkewed", "MinSkewed", "MaxClumpy", "MinClumpy", "MaxSparse", "MinSparse", "axStriated", "MinStriated", "MaxConvex", "MinConvex", "MaxSkinny", "MinSkinny", "MaxStringy", "MinStringy", "MaxMonotonic", "MinMonotonic"), digits = 5)
 
 getTraits<-function(globalVariables, directory){
   if (dir.exists(directory)) {

@@ -4,8 +4,9 @@ plotDNAmProfile_UI <- function(id){
     shiny::fluidRow(
       shiny::column(12, htmltools::tags$html(tags$body(h4('DMR window size'))),
        shiny::sliderInput(ns("DMRWindow"), "", #"DMR window size",
-                   1, 50, 5, 1, width = "100%")
-      )
+                   1, 50, 5, 1, width = "100%"),
+       shinyBS::bsTooltip(id = ns("DMRWindow"), title = "size of window around selected CpG", placement = "right", trigger = "hover")
+       )
     ),
     shiny::fluidRow(
       shiny::column(width = 12,
@@ -92,7 +93,8 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
       DMPNearRange = reDMPNearRange()
       DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange, globalVariables$config$baseURL_MRCEWASCatalog)
       DT::datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
-                options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv')))
+                options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
+      DT::formatSignif(2:ncol(DMPNearRange), digits = 2)
     }, server = FALSE)
   })
 }
