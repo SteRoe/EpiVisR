@@ -35,7 +35,12 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
         print(paste0(Sys.time(), " rendering correlating data table."))
         CP <- reDFCorrelatingProbes()
         DT::datatable(CP, escape = F, extensions="Scroller", style="bootstrap", class="compact", width="100%",
-                  options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE))
+                  options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE)) %>%
+          DT::formatSignif(3:5, digits = 2)
+        #if JavaScript error occurs, this has something to do with temp space on server: restart R session
+        # DT::datatable(CP, escape = F, extensions="Scroller", style="bootstrap", class="compact", width="100%",
+        #               callback = JS("$.fn.dataTable.ext.errMode = 'none';"),
+        #               options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE))
       }, error = function(err) {
         shiny::validate(shiny::need(nrow(CP)>0,"No data to show"))
       })

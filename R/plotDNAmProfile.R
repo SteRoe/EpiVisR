@@ -92,9 +92,10 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
       on.exit(shiny::removeNotification(id), add = TRUE)
       DMPNearRange = reDMPNearRange()
       DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange, globalVariables$config$baseURL_MRCEWASCatalog)
+browser()
       DT::datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
                 options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
-      DT::formatSignif(2:ncol(DMPNearRange), digits = 2)
+      DT::formatSignif(3:ncol(DMPNearRange), digits = 2)
     }, server = FALSE)
   })
 }
