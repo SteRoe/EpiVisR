@@ -48,7 +48,7 @@ getDMPNearRange <- function(globalVariables, sessionVariables, range) {
     DMP = sessionVariables$probe$probe
     trait<-gsub("adj","",trait)
     #get trait data
-    traitVar = traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
+    traitVar = traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
     #get DMP range data
     probeIDs = getDMPNearRangeprobeID(globalVariables, DMP,range)
     DMPNearRangeData = as.data.frame(globalVariables$beta.t[,probeIDs])
@@ -165,8 +165,8 @@ plotlyViolinForDMP <- function(globalVariables, DMPNearRange) {
     min <- min(DMPNearRange[,3])
     max <- max(DMPNearRange[,3])
     dens <- stats::density(DMPNearRange[,3], bw = "sj")
-    femaleDMPNearRange <- DMPNearRange[DMPNearRange$gender == globalVariables$config$genderFemaleValue,] #femaleDMPNearRange = DMPNearRange[DMPNearRange$gender == 'w',]
-    maleDMPNearRange <- DMPNearRange[DMPNearRange$gender == globalVariables$config$genderMaleValue,] #maleDMPNearRange = DMPNearRange[DMPNearRange$gender == 'm',]
+    femaleDMPNearRange <- DMPNearRange[DMPNearRange$sex == globalVariables$config$sexFemaleValue,]
+    maleDMPNearRange <- DMPNearRange[DMPNearRange$sex == globalVariables$config$sexMaleValue,]
     femaleDens <- stats::density(femaleDMPNearRange[,3], bw = "sj")
     maleDens <- stats::density(maleDMPNearRange[,3], bw = "sj")
     plot <- plotly::plot_ly()

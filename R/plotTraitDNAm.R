@@ -16,7 +16,7 @@ plotTraitDNAm_SERVER <- function(id, globalVariables, sessionVariables) {
     trait = sessionVariables$trait$trait
     probe = sessionVariables$probe$probe
     output$plotlyOneProbe <- plotly::renderPlotly(printScatterPlotlyForOneProbeID(globalVariables, sessionVariables))
-    output$plotlyHorizontalViolin <- plotly::renderPlotly(plotlyHorizontalViolin(traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut), globalVariables$config$genderFemaleValue, globalVariables$config$genderMaleValue))
+    output$plotlyHorizontalViolin <- plotly::renderPlotly(plotlyHorizontalViolin(traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut), globalVariables$config$sexFemaleValue, globalVariables$config$sexMaleValue))
   })
 }
 
@@ -34,7 +34,7 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
     beta_single<-(as.data.frame(beta_single))
     beta_single$ID <- rownames(beta_single)
     #pick variable from traits dataframe
-    traitVar <- traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
+    traitVar <- traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
     traitName <- sessionVariables$trait$trait
     DMP = sessionVariables$probe$probe
     P_VAL <- sessionVariables$resultDataSingleTrait$P_VAL[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
@@ -45,9 +45,9 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
     plotData <- stats::na.omit(plotData)
     min <- min(plotData[4])
     max <- max(plotData[4])
-    gender <- "factor(gender)"
-    plotDataFemale = subset(plotData, plotData$gender == globalVariables$config$genderFemaleValue)
-    plotDataMale = subset(plotData, plotData$gender == globalVariables$config$genderMaleValue)
+    sex <- "factor(sex)"
+    plotDataFemale = subset(plotData, plotData$sex == globalVariables$config$sexFemaleValue)
+    plotDataMale = subset(plotData, plotData$sex == globalVariables$config$sexMaleValue)
 
     fmla = stats::as.formula(paste0("`", probeID, "` ~ `", Name,"`"))
     m <- stats::lm(fmla, data = plotData)
@@ -101,8 +101,8 @@ plotlyHorizontalViolin <- function(traitDF, femaleValue, maleValue) {
     min <- min(traitDF[,3])
     max <- max(traitDF[,3])
     dens <- stats::density(traitDF[,3], bw = "sj")
-    femaletraitDF = traitDF[traitDF$gender == femaleValue,]
-    maletraitDF = traitDF[traitDF$gender == maleValue,]
+    femaletraitDF = traitDF[traitDF$sex == femaleValue,]
+    maletraitDF = traitDF[traitDF$sex == maleValue,]
     femaleDens <- stats::density(femaletraitDF[,3], bw = "sj")
     maleDens <- stats::density(maletraitDF[,3], bw = "sj")
     plot <- plotly::plot_ly()

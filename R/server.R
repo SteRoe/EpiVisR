@@ -21,7 +21,7 @@ server <- function(input, output, session) {
       print(paste0(Sys.time(), " plotting Manhattan/Volcano plots."))
       df = getResultDataSingleTrait(globalVariables, sessionVariables, 0.05)
       sessionVariables$resultDataSingleTrait = df
-      sessionVariables$traitDF <- traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut) #if error occurs here, then the wrong Traits file is referenced
+      sessionVariables$traitDF <- traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut) #if error occurs here, then the wrong Traits file is referenced
       plotManhattanVolcano_SERVER("M", globalVariables, sessionVariables)
     }
   })

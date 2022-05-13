@@ -63,7 +63,7 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
           result = list()
           i = NULL
           foreach(i=1:ncol(selectedProbes)) %do% {
-            traitVar<-traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut)
+            traitVar<-traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
             selectedProbes$ID <- rownames(selectedProbes)
             selectedProbe <- as.data.frame(selectedProbes[,i])
             colnames(selectedProbe)[1] <- colnames(selectedProbes)[i]

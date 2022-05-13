@@ -41,7 +41,7 @@ EpiVisRApp <- function() {
   shiny::shinyApp(ui, server)
 }
 
-#' gets back the currently selected trait together with gender information and traitnames were replaced with filename compatible characters
+#' gets back the currently selected trait together with sex information and traitnames were replaced with filename compatible characters
 #'
 #' @param globalVariables contains all global available Objects
 #' @return data.frame
@@ -63,19 +63,19 @@ getTraitsDFLong <- function(globalVariables, sessionVariables) {
       id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
     });
     tryCatch({
-      genderFileName <- globalVariables$config$genderFileName
-      Gender <- fread(file=genderFileName, sep="\t", dec=".", data.table = FALSE)
-      Gender <- base::subset(Gender, select=c(globalVariables$config$mergeAttribut, globalVariables$config$genderAttribut))
-      Gender <- as.data.frame(Gender)
-      if (nrow(Gender) != nrow(traitDFLong)) {
-        errortext = paste0("nrow(Gender)=", nrow(Gender), " does not match nrow(traitDFLong)=", nrow(traitDFLong),".")
+      sexFileName <- globalVariables$config$sexFileName
+      Sex <- fread(file=sexFileName, sep="\t", dec=".", data.table = FALSE)
+      Sex <- base::subset(Sex, select=c(globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut))
+      Sex <- as.data.frame(Sex)
+      if (nrow(Sex) != nrow(traitDFLong)) {
+        errortext = paste0("nrow(Sex)=", nrow(Sex), " does not match nrow(traitDFLong)=", nrow(traitDFLong),".")
         message(errortext)
         id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
       }
-      traitDFLong <- base::merge(traitDFLong, Gender, by.x = globalVariables$config$mergeAttribut, by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
+      traitDFLong <- base::merge(traitDFLong, Sex, by.x = globalVariables$config$mergeAttribut, by.y = globalVariables$config$mergeAttribut, all.x = FALSE, all.y=FALSE)
       return (traitDFLong)
     }, error=function(err){
-      errortext = paste0("unable to open gender file ", globalVariables$config$genderFileName)
+      errortext = paste0("unable to open sex file ", globalVariables$config$sexFileName)
       message(errortext)
       id <- shiny::showNotification(errortext, duration = NULL, type = "error", closeButton = TRUE)
     });
@@ -96,8 +96,8 @@ addPackagePathToConfig <- function(config, packagePath){
   if (base::startsWith(config$traitFileName, "./inst/")) {
     config$traitFileName = stringr::str_replace(config$traitFileName, "./inst/", packagePath)
   }
-  if (base::startsWith(config$genderFileName, "./inst/")) {
-    config$genderFileName = stringr::str_replace(config$genderFileName, "./inst/", packagePath)
+  if (base::startsWith(config$sexFileName, "./inst/")) {
+    config$sexFileName = stringr::str_replace(config$sexFileName, "./inst/", packagePath)
   }
   if (base::startsWith(config$dataDir, "./inst/")) {
     config$dataDir = stringr::str_replace(config$dataDir, "./inst/", packagePath)
@@ -186,13 +186,13 @@ readTxtGzFromURL <- function(URL) {
 #' traitDF
 #' @param sessionVariables sessionVariables
 #' @param mergeAttribut mergeAttribut
-#' @param genderAttribut genderAttribut
-#' @return data.frame with trait data, merge attribute and gender attribute
+#' @param sexAttribut sexAttribut
+#' @return data.frame with trait data, merge attribute and sex attribute
 #' @keywords internal
 #' @noRd
-traitDF <- function(sessionVariables, mergeAttribut, genderAttribut) {
+traitDF <- function(sessionVariables, mergeAttribut, sexAttribut) {
   trait = sessionVariables$trait$trait
-  df = sessionVariables$traitsDFLong[,c(mergeAttribut, genderAttribut, trait)]
+  df = sessionVariables$traitsDFLong[,c(mergeAttribut, sexAttribut, trait)]
   return (df)
 }
 
