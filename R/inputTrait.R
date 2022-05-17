@@ -117,9 +117,9 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   output$traits <- DT::renderDataTable({
     id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
     on.exit(shiny::removeNotification(id), add = TRUE)
-#browser()
 #    tableData <- moduleVariables$traitsWithSummary %>% dplyr::mutate_if(is.numeric, signif, digits = 3)
     tableData <- moduleVariables$traitsWithSummary
+#    colnames(tableData) <- stringr::str_to_title(colnames(tableData))
     DT::datatable(tableData, selection = "single", editable = FALSE, extensions = list("Scroller"), style = "bootstrap", class = "compact", width = "100%",
               options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE)) %>%
     DT::formatSignif(2:ncol(tableData), digits = 2)
@@ -159,7 +159,7 @@ getTraits<-function(globalVariables, directory){
 getTraitsWithSummary <- function(globalVariables, directory, exludeMultiModalProbes = TRUE){
   print(paste0(Sys.time(), " start reading traits"))
   if (dir.exists(directory)) {
-    traits <- data.frame(trait="ex", MaxN = 1, MinP_VAL = 0, MinFDR = 0, MaxBETA = 1, MaxDeltaMeth = 1, MinDeltaMeth = 1, MaxOutlying = 1, MinOutlying = 0, MaxSkewed = 1, MinSkewed = 0, MaxClumpy = 1, MinClumpy = 0, MaxSparse = 1, MinSparse = 0, MaxStriated = 1, MinStriated = 0, MaxConvex = 1, MinConvex = 0, MaxSkinny = 1, MinSkinny = 0, MaxStringy = 1, MinStringy = 0, MaxMonotonic = 1, MinMonotonic = 0)
+    traits <- data.frame(Trait="ex", MaxN = 1, MinP_VAL = 0, MinFDR = 0, MaxBETA = 1, MaxDeltaMeth = 1, MinDeltaMeth = 1, MaxOutlying = 1, MinOutlying = 0, MaxSkewed = 1, MinSkewed = 0, MaxClumpy = 1, MinClumpy = 0, MaxSparse = 1, MinSparse = 0, MaxStriated = 1, MinStriated = 0, MaxConvex = 1, MinConvex = 0, MaxSkinny = 1, MinSkinny = 0, MaxStringy = 1, MinStringy = 0, MaxMonotonic = 1, MinMonotonic = 0)
     tr <- traits
     print(paste0(Sys.time(), " start loading folder"))
     tryCatch({

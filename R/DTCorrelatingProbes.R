@@ -34,6 +34,7 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
       tryCatch({
         print(paste0(Sys.time(), " rendering correlating data table."))
         CP <- reDFCorrelatingProbes()
+#        colnames(CP) <- stringr::str_to_title(colnames(CP))
         DT::datatable(CP, escape = F, extensions="Scroller", style="bootstrap", class="compact", width="100%",
                   options=list(pageLength = 5, deferRender=TRUE, scrollY=300, scroller=TRUE)) %>%
           DT::formatSignif(3:5, digits = 2)
@@ -95,7 +96,7 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
                               color = I("gray80"), showlegend = FALSE) %>%
                   plotly::add_lines(y = ~.fitted, color = I("steelblue"), showlegend = FALSE) %>%
                   plotly::layout(
-                    yaxis = list(title = '%', range = c(0,1))
+                    yaxis = list(title = 'Methylation [%]', range = c(0,1))
 #                    yaxis = list(range = c(0,1))
                   )
                 plotList = c(plotList,list(plot))
@@ -106,14 +107,20 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
               #   b = 0,
               #   t = 0
               # )
-              plotlyscatter <- plotly::subplot(plotList, shareX = TRUE, shareY = TRUE, nrows = length(dfList)) %>%
-              # plotly::layout(autosize = T, margin = m) %>%
-              # plotly::layout(annotations = list(
-              #     list(x = -0.15, y = 0.5, text = "Methylation [%]",
-              #          xshift = -50,
-              #          textangle = 270,
-              #          showarrow = F, xref='paper', yref='paper', size=48)
-              #   ))
+              plotlyscatter <- plotly::subplot(plotList, shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = FALSE, nrows = length(dfList)) %>%
+                add_annotations(
+                  text = "Methylation [%]",
+                  x = 0,
+                  y = 0.5,
+                  yref = "paper",
+                  xref = "paper",
+                  xanchor = "center",
+                  yanchor = "center",
+                  xshift = -35,
+                  showarrow = FALSE,
+                  textangle = 270,
+                  font = list(size = 15)
+                )
               return(plotlyscatter)
             }
           })

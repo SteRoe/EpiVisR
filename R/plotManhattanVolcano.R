@@ -19,8 +19,8 @@ plotManhattanVolcano_UI <- function(id){
           shiny::tabsetPanel(
             shiny::tabPanel("Visualisation",
 #            shiny::fluidRow(
-                shiny::column(6, plotly::plotlyOutput(ns("plotManhattan"))),
-                shiny::column(6, plotly::plotlyOutput(ns("plotVolcano")))
+                shiny::column(6, plotly::plotlyOutput(ns("plotManhattan"), height = "550px", width = "900px")),
+                shiny::column(6, plotly::plotlyOutput(ns("plotVolcano"), height = "550px", width = "900px"))
 #            )
               ),
               shiny::tabPanel("Table",
@@ -59,7 +59,9 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
       on.exit(shiny::removeNotification(id), add = TRUE)
       tryCatch({
         print(paste0(Sys.time(), " render data table Manhattan/ volcano."))
-        DT::datatable(reDFManhattanVolcano(), escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
+        CP <- reDFManhattanVolcano()
+#        colnames(CP) <- stringr::str_to_title(colnames(CP))
+        DT::datatable(CP, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
                       options = list(searching = TRUE, pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
         DT::formatSignif(2:6, digits = 2)
       }, error = function(err) {
@@ -75,6 +77,7 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
         data <- getDFforPathwayAnalysis(reDFManhattanVolcano())
         # Show data
         print(paste0(Sys.time(), " render data table pathway."))
+#        colnames(data) <- stringr::str_to_title(colnames(data))
         DT::datatable(data, extensions = 'Buttons', height = 400,
                       options = list(scrollY = TRUE, scroller = TRUE, searching = TRUE,
                                      ordering = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
@@ -135,7 +138,7 @@ plotlyManhattanVolcano <- function(globalVariables, DF, M_V) {
                                 #text = paste0(DF$probeID,"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 text = paste0(DF[,globalVariables$config$probeAttribut],"\nDeltaMeth: ", DF$DeltaMeth,"\n Gene symbol: ",DF$gene.symbolShort,"\nn:",DF$n),
                                 hoverinfo = 'text', key = ~probeID)
-      plot = plot %>% plotly::layout(xaxis = list(type = "lin"),
+      plot = plot %>% plotly::layout(xaxis = list(title = "globalArrayPosition", type = "lin"),
                              yaxis = list(type = "log", autorange = "reversed", exponentformat = "power", dtick = 3))
     }
     else {

@@ -87,7 +87,21 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
         yaxis = list(title = 'Methylation [%]', range = c(0,1)),
         xaxis = list(title = Name, range = c(min,max))
       )
-    plot = plotly::subplot(plot,plotFemale,plotMale,nrows=3, shareX = TRUE, shareY = TRUE)
+    plot = plotly::subplot(plot,plotFemale,plotMale,nrows=3, shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = FALSE) %>%
+      add_annotations(
+        text = "Methylation [%]",
+        x = 0,
+        y = 0.5,
+        yref = "paper",
+        xref = "paper",
+        xanchor = "center",
+        yanchor = "center",
+        xshift = -35,
+        showarrow = FALSE,
+        textangle = 270,
+        font = list(size = 15)
+      )
+
     return(plot)
   }, error=function(err){
     message(paste0(Sys.time(), "unable to plot ", probeID, " vs. ", Name, "; ", err$message))
