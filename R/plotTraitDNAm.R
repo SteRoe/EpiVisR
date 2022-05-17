@@ -88,7 +88,7 @@ printScatterPlotlyForOneProbeID<-function(globalVariables, sessionVariables){
         xaxis = list(title = Name, range = c(min,max))
       )
     plot = plotly::subplot(plot,plotFemale,plotMale,nrows=3, shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = FALSE) %>%
-      add_annotations(
+      plotly::add_annotations(
         text = "Methylation [%]",
         x = 0,
         y = 0.5,

@@ -108,7 +108,7 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
               #   t = 0
               # )
               plotlyscatter <- plotly::subplot(plotList, shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = FALSE, nrows = length(dfList)) %>%
-                add_annotations(
+                plotly::add_annotations(
                   text = "Methylation [%]",
                   x = 0,
                   y = 0.5,
