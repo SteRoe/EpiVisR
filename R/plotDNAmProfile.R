@@ -152,6 +152,34 @@ plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
       coloraxis = list(
         title = traitName)
     )
+    plot <- plot %>%
+      plotly::add_annotations(
+        text = "Methylation [%]",
+        x = 0,
+        y = 0.5,
+        yref = "paper",
+        xref = "paper",
+        xanchor = "center",
+        yanchor = "center",
+        xshift = -50,
+        showarrow = FALSE,
+        textangle = 270,
+        font = list(size = 15)
+      )
+    plot <- plot %>%
+      plotly::add_annotations(
+        text = "globalArrayPosition",
+        x = 0.5,
+        y = 0,
+        yref = "paper",
+        xref = "paper",
+        xanchor = "center",
+        yanchor = "center",
+        yshift = -35,
+        showarrow = FALSE,
+        textangle = 0,
+        font = list(size = 15)
+      )
     return (plot)
   }, error=function(err){
     print(paste0("unable to print pc plot; ", err$message))
