@@ -96,11 +96,11 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   on.exit(shiny::removeNotification(id), add = TRUE)
   print(paste0(Sys.time(), " before renderText."))
   sessionVariables$traitsDFLong <- getTraitsDFLong(globalVariables, sessionVariables)
-  output$txtDataFile <- shiny::renderText(globalVariables$config$traitFileName) #(sessionVariables$dataFileName)
+  output$txtDataFile <- shiny::renderText(globalVariables$config$traitFileName)
   print(paste0(Sys.time(), " assign traitsDFLong."))
   tryCatch({
     print(paste0(Sys.time(), " getTraits."))
-    traits <- getTraits(globalVariables, sessionVariables$folder) #globalVariables$config$dataDir)
+    traits <- getTraits(globalVariables, sessionVariables$folder)
     }, error=function(err){
       message(Sys.time(), paste0("unable to read folder ", sessionVariables$folder))
   });

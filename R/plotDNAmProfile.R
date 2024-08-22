@@ -34,47 +34,92 @@ plotDNAmProfile_UI <- function(id){
   )
 }
 
-getDMPNearRangeprobeID <- function(globalVariables, DMP, range) {
-  a = globalVariables$annotation[order(globalVariables$annotation$chromosome, globalVariables$annotation$position),]
-  position = which(a$name == DMP)
+# getDMPNearRangeprobeIDSessionVariables <- function(globalVariables, DMP, range) {
+#   probeID = globalVariables$annotation[order(globalVariables$annotation$chromosome, globalVariables$annotation$position),]
+#   result <- getDMPNearRangeprobeID(probeID, DMP, range)
+#   return(result)
+# }
+
+# getDMPNearRangeprobeID <- function(probeID, DMP, range) {
+#   #probeID = globalVariables$annotation[order(globalVariables$annotation$chromosome, globalVariables$annotation$position),]
+#   position = which(probeID$name == DMP)
+#   positionStart = position - range
+#   positionEnd = position + range
+#   probeIDs = probeID[positionStart:positionEnd,]$name
+#   return(probeIDs)
+# }
+
+#' gets a data frame with the near range probeIDs of a DMR
+#' @description gets a data structure with the near range of a DMR
+#' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @param DMP
+#' @param range
+#' @return data.frame
+#' @export
+getDMPNearRangeprobeID <- function(annotation, DMP, range) {
+  probeID = annotation[order(annotation$chromosome, annotation$position),]
+  position = which(probeID$name == DMP)
   positionStart = position - range
   positionEnd = position + range
-  probeIDs = a[positionStart:positionEnd,]$name
+  probeIDs = probeID[positionStart:positionEnd,]$name
+  return(probeIDs)
 }
 
-getDMPNearRange <- function(globalVariables, sessionVariables, range) {
+getDMPNearRangeSessionVariables <- function(globalVariables, sessionVariables, range) {
+  DMP = sessionVariables$probe$probe
+  traitVar <- traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
+  probeIDs <- getDMPNearRangeprobeID(globalVariables$annotation, DMP, range)
+  DMPNearRangeData <- as.data.frame(globalVariables$beta.t[, probeIDs])
+  mergeAttribut <- globalVariables$config$mergeAttribut
+  result <- getDMPNearRange(DMP, DMPNearRangeData, traitVar, mergeAttribut, range)
+  return(result)
+}
+
+#' gets a data structure with the near range of a DMR
+#' @description gets a data structure with the near range of a DMR
+#' @param DMP #tbc()a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param probe #tbc  probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param range trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
+#' @return data.frame
+#' @export
+#getDMPNearRange <- function(globalVariables, sessionVariables, range) {
+getDMPNearRange <- function(DMP, DMPNearRangeData, traitVar, mergeAttribut, range) {
   tryCatch({
-    trait = sessionVariables$trait$trait
-    DMP = sessionVariables$probe$probe
-    trait<-gsub("adj","",trait)
+    #trait = sessionVariables$trait$trait
+    #DMP = sessionVariables$probe$probe
+    #trait<-gsub("adj","",trait)
     #get trait data
-    traitVar = traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
+    #traitVar = traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
     #get DMP range data
-    probeIDs = getDMPNearRangeprobeID(globalVariables, DMP,range)
-    DMPNearRangeData = as.data.frame(globalVariables$beta.t[,probeIDs])
-    DMPNearRangeData$ID = rownames(DMPNearRangeData)
+    #probeIDs = getDMPNearRangeprobeIDSessionVariables(globalVariables, DMP,range)
+    #probeIDs = getDMPNearRangeprobeID(globalVariables$annotation, DMP,range)
+    #DMPNearRangeData = as.data.frame(globalVariables$beta.t[,probeIDs])
+    DMPNearRangeData$ID <- rownames(DMPNearRangeData)
     #merge all
-    traitDMPNearRangeData = base::merge(traitVar, DMPNearRangeData, by.x = globalVariables$config$mergeAttribut, by.y = "ID", all.x = FALSE, all.y=FALSE)
+    traitDMPNearRangeData <- base::merge(traitVar, DMPNearRangeData, by.x = mergeAttribut, by.y = "ID", all.x = FALSE, all.y=FALSE)
 
     rownames(traitDMPNearRangeData) = traitDMPNearRangeData$ID
   }, error=function(err){
-    print(paste0("unable find near range for ", DMP, " <-> ", trait, ". - ", err$message))
+    #print(paste0("unable find near range for ", DMP, " <-> ", trait, ". - ", err$message))
+    print(paste0("unable find near range for ", DMP, " <-> ", traitVar, ". - ", err$message))
   });
   return(traitDMPNearRangeData)
 }
 
+#' Plots the near range of a DMR
+#' @description plots the near range of a DMR defined inside session variables
 plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
   shiny::moduleServer(id, function(input, output, session) {
     id <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
     on.exit(shiny::removeNotification(id), add = TRUE)
-    reDMPNearRange <- shiny::reactive({getDMPNearRange(globalVariables, sessionVariables, input$DMRWindow)})
+    reDMPNearRange <- shiny::reactive({getDMPNearRangeSessionVariables(globalVariables, sessionVariables, input$DMRWindow)})
 
     output$PlotlyPcPDMPNearRange <- plotly::renderPlotly({
       DMPNearRange = reDMPNearRange()
       if (!is.null(DMPNearRange)) {
         id <- shiny::showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
         on.exit(shiny::removeNotification(id), add = TRUE)
-        plotlyPcPForDMP(globalVariables, sessionVariables, DMPNearRange)
+        plotlyPcPForDMPSessionVariables(globalVariables, sessionVariables, DMPNearRange)
       }
     })
 
@@ -83,7 +128,7 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
       if (!is.null(DMPNearRange)) {
         id <- shiny::showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
         on.exit(shiny::removeNotification(id), add = TRUE)
-        plotlyViolinForDMP(globalVariables, DMPNearRange)
+        plotlyViolinForDMPSessionVariables(globalVariables, DMPNearRange)
       }
     })
 
@@ -96,22 +141,46 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
       DT::datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
                 options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
       DT::formatSignif(3:ncol(DMPNearRange), digits = 2)
-    }, server = FALSE)
+    }, server = FALSE, escape = FALSE)
   })
 }
 
-plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
+#' Plots the near range of a DMR
+#' @description plots the near range of a DMR and gives a plotly object back using session variables
+plotlyPcPForDMPSessionVariables <- function(globalVariables, sessionVariables, DMPNearRange) {
+  probe <- sessionVariables$probe$probe
+  resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+  annotation <- globalVariables$annotation
+  result <- plotlyPcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation)
+  #result <- plotlyPcPForDMP(DMPNearRange, probe, P_VAL, DeltaMeth, annotation)
+  return(result)
+}
+
+#' Plots the near range of a DMR
+#' @description plots the near range of a DMR in a parallel coordinate plot and gives a plotly object back
+#' @param DMPNearRange a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
+#' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @return plotly object
+#' @export
+plotlyPcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
+#plotlyPcPForDMP <- function(DMPNearRange, probe, P_VAL, DeltaMeth, annotation) {
+#plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
   tryCatch({
     traitName <- colnames(DMPNearRange)[3]
-    DMP <- sessionVariables$probe$probe
-    df <- sessionVariables$resultDataSingleTrait
-    df <- resultDataSingleScenarioWithAnnotation(globalVariables$annotation, df)
-    gene.symbol <- df[which(df$probeID == DMP),]$gene.symbol
+    #DMP <- sessionVariables$probe$probe
+    #df <- sessionVariables$resultDataSingleTrait
+    df <- resultDataSingleTrait
+    #df <- resultDataSingleScenarioWithAnnotation(globalVariables$annotation, df)
+    df <- resultDataSingleScenarioWithAnnotation(annotation, df)
+    gene.symbol <- df[which(df$probeID == probe),]$gene.symbol
+browser()
     DMPNearRange <- stats::na.omit(DMPNearRange)
     DMPNearRangeShort <- DMPNearRange[,4:ncol(DMPNearRange)]
     dimensionsList=list()
-    P_VAL <- sessionVariables$resultDataSingleTrait$P_VAL[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
-    DeltaMeth <- sessionVariables$resultDataSingleTrait$DeltaMeth[sessionVariables$resultDataSingleTrait$probeID == sessionVariables$probe$probe]
+    P_VAL <- resultDataSingleTrait$P_VAL[resultDataSingleTrait$probeID == probe]
+    DeltaMeth <- resultDataSingleTrait$DeltaMeth[resultDataSingleTrait$probeID == probe]
     for (i in 1:ncol(DMPNearRangeShort)) {
       lblCpG = colnames(DMPNearRangeShort)[i]
       lblP = signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i]),]$P_VAL,3)
@@ -123,8 +192,8 @@ plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
         lblP = ",\n p: n.s."
         lblDM = ""
       }
-      lblSym = paste0(",\n sbl:", globalVariables$annotation[which(globalVariables$annotation$name == colnames(DMPNearRangeShort)[i]),]$gene.symbol)
-      lblPos = paste0(",\n pos:", globalVariables$annotation[which(globalVariables$annotation$name == colnames(DMPNearRangeShort)[i]),]$position)
+      lblSym = paste0(",\n sbl:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$gene.symbol)
+      lblPos = paste0(",\n pos:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$position)
       label = paste0(lblCpG, lblP, lblDM, lblSym, lblPos)
       dimension = list(label = label, values = DMPNearRangeShort[,i],
                        range = c(0, 1))
@@ -142,7 +211,8 @@ plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
                               dimensions = dimensionsList
     )
     plot <- plot %>% plotly::layout(
-      title = paste0(traitName, " vs. ", DMP, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
+      #title = paste0(traitName, " vs. ", DMP, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
+      title = paste0(traitName, " vs. ", probe, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
       xaxis = list(
         title = "Location",
         showgrid = F,
@@ -182,19 +252,30 @@ plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
       )
     return (plot)
   }, error=function(err){
-    print(paste0("unable to print pc plot; ", err$message))
+    print(paste0("unable to print pc plot: ", err$message))
     return(empty_plot(err$message))
   });
 }
 
-plotlyViolinForDMP <- function(globalVariables, DMPNearRange) {
+plotlyViolinForDMPSessionVariables <- function(globalVariables, DMPNearRange) {
+  sexFemaleValue <- globalVariables$config$sexFemaleValue
+  sexMaleValue <- globalVariables$config$sexMaleValue
+  result <- plotlyViolinForDMP(sexFemaleValue, sexMaleValue, DMPNearRange)
+  return(result)
+}
+
+#' Plots the violin plot for both sexes of a near range of a DMR
+#' @description plots the violin plot for both sexes of a near range of a DMR and gives a plotly object back
+#' @export
+plotlyViolinForDMP <- function(sexFemaleValue, sexMaleValue, DMPNearRange) {
+#plotlyViolinForDMP <- function(globalVariables, DMPNearRange) {
   tryCatch({
     DMPNearRange = stats::na.omit(DMPNearRange)
     min <- min(DMPNearRange[,3])
     max <- max(DMPNearRange[,3])
     dens <- stats::density(DMPNearRange[,3], bw = "sj")
-    femaleDMPNearRange <- DMPNearRange[DMPNearRange$sex == globalVariables$config$sexFemaleValue,]
-    maleDMPNearRange <- DMPNearRange[DMPNearRange$sex == globalVariables$config$sexMaleValue,]
+    femaleDMPNearRange <- DMPNearRange[DMPNearRange$sex == sexFemaleValue,]
+    maleDMPNearRange <- DMPNearRange[DMPNearRange$sex == sexMaleValue,]
     femaleDens <- stats::density(femaleDMPNearRange[,3], bw = "sj")
     maleDens <- stats::density(maleDMPNearRange[,3], bw = "sj")
     plot <- plotly::plot_ly()

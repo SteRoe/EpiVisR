@@ -367,7 +367,7 @@ removeMultiModeCpGFromBeta<-function(df, multiModList){
 #' @param a data.frame to which links should be added
 #' @return data.frame
 #' @keywords internal
-#' @noRd
+#' @export
 # examples reducedAnnotation(data.frame)
 #reducedAnnotation <- function(globalVariables){
 reducedAnnotation <- function(a){
