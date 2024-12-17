@@ -52,8 +52,8 @@ plotDNAmProfile_UI <- function(id){
 #' gets a data frame with the near range probeIDs of a DMR
 #' @description gets a data structure with the near range of a DMR
 #' @param annotation annotation data (pre loaded); the annotation from meffil
-#' @param DMP
-#' @param range
+#' @param DMP CpG to find the range around
+#' @param range number of CpG to the left and to the right to include to range (truncated at chromosome end)
 #' @return data.frame
 #' @export
 getDMPNearRangeprobeID <- function(annotation, DMP, range) {
@@ -162,56 +162,72 @@ plotlyPcPForDMPSessionVariables <- function(globalVariables, sessionVariables, D
 #' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
 #' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
 #' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @param selection a list of cg numbers to mark within the methylation profile plot
+#' @param shortlabel if TRUE only the cg number is plotted into the methylation profile plot
 #' @return plotly object
 #' @export
-plotlyPcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
-#plotlyPcPForDMP <- function(DMPNearRange, probe, P_VAL, DeltaMeth, annotation) {
-#plotlyPcPForDMP <- function(globalVariables, sessionVariables, DMPNearRange) {
+plotlyPcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation, selection, shortlabel = TRUE) {
   tryCatch({
     traitName <- colnames(DMPNearRange)[3]
-    #DMP <- sessionVariables$probe$probe
-    #df <- sessionVariables$resultDataSingleTrait
     df <- resultDataSingleTrait
-    #df <- resultDataSingleScenarioWithAnnotation(globalVariables$annotation, df)
     df <- resultDataSingleScenarioWithAnnotation(annotation, df)
     gene.symbol <- df[which(df$probeID == probe),]$gene.symbol
-browser()
     DMPNearRange <- stats::na.omit(DMPNearRange)
     DMPNearRangeShort <- DMPNearRange[,4:ncol(DMPNearRange)]
     dimensionsList=list()
     P_VAL <- resultDataSingleTrait$P_VAL[resultDataSingleTrait$probeID == probe]
     DeltaMeth <- resultDataSingleTrait$DeltaMeth[resultDataSingleTrait$probeID == probe]
     for (i in 1:ncol(DMPNearRangeShort)) {
-      lblCpG = colnames(DMPNearRangeShort)[i]
-      lblP = signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i]),]$P_VAL,3)
-      if (shiny::isTruthy(lblP)) {
-        lblP = paste0(",\n p: ", lblP)
-        lblDM = paste0(",\n d: ", signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i]),]$DeltaMeth,3))
+      lblCpG <- colnames(DMPNearRangeShort)[i]
+      if (!missing(shortlabel) && shortlabel != TRUE) {
+        lblP <- signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i]),]$P_VAL,3)
+        if (shiny::isTruthy(lblP)) {
+          lblP <- paste0(",\n p: ", lblP)
+          lblDM <- paste0(",\n d: ", signif(df[which(df$probeID == colnames(DMPNearRangeShort)[i]),]$DeltaMeth,3))
+        }
+        else {
+          lblP <- ",\n p: n.s."
+          lblDM <- ""
+        }
+        lblSym <- paste0(",\n sbl:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$gene.symbol)
+        lblPos <- paste0(",\n pos:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$position)
+        label <- paste0(lblCpG, lblP, lblDM, lblSym, lblPos)
       }
       else {
-        lblP = ",\n p: n.s."
-        lblDM = ""
+        label <- lblCpG
       }
-      lblSym = paste0(",\n sbl:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$gene.symbol)
-      lblPos = paste0(",\n pos:", annotation[which(annotation$name == colnames(DMPNearRangeShort)[i]),]$position)
-      label = paste0(lblCpG, lblP, lblDM, lblSym, lblPos)
-      dimension = list(label = label, values = DMPNearRangeShort[,i],
-                       range = c(0, 1))
-      dimensionsList = append(dimensionsList,list(dimension))
+      markCpG <- FALSE
+      if (!missing(selection)) {
+        if (lblCpG %in% selection) {
+          markCpG <- TRUE
+        }
+      }
+      if (markCpG) {
+        dimension <- list(label = label,
+                          values = DMPNearRangeShort[,i],
+                          range = c(0, 1),
+                          constraintrange = c(0, 1))
+      }
+      else {
+        dimension <- list(label = label,
+                          values = DMPNearRangeShort[,i],
+                          range = c(0, 1))
+      }
+      dimensionsList <- append(dimensionsList, list(dimension))
     }
     plot <- plotly::plot_ly(data = DMPNearRange)
     plot <- plot %>% plotly::add_trace(type = 'parcoords',
-                              line = list(shape = 'spline',
-                                          color =  DMPNearRange[,3],
-                                          colorscale = 'Jet',
-                                          showscale = TRUE,
-                                          reversescale = TRUE,
-                                          cmin = min(DMPNearRange[,3],na.rm=TRUE),
-                                          cmax = max(DMPNearRange[,3],na.rm=TRUE)),
-                              dimensions = dimensionsList
+                                       line = list(shape = 'spline',
+                                                   color =  DMPNearRange[,3],
+                                                   colorscale = 'Jet',
+                                                   showscale = TRUE,
+                                                   reversescale = TRUE,
+                                                   cmin = min(DMPNearRange[,3],na.rm=TRUE),
+                                                   cmax = max(DMPNearRange[,3],na.rm=TRUE)),
+                                       dimensions = dimensionsList,
+                                       labelangle = 270
     )
     plot <- plot %>% plotly::layout(
-      #title = paste0(traitName, " vs. ", DMP, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
       title = paste0(traitName, " vs. ", probe, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
       xaxis = list(
         title = "Location",
