@@ -34,21 +34,6 @@ plotDNAmProfile_UI <- function(id){
   )
 }
 
-# getDMPNearRangeprobeIDSessionVariables <- function(globalVariables, DMP, range) {
-#   probeID = globalVariables$annotation[order(globalVariables$annotation$chromosome, globalVariables$annotation$position),]
-#   result <- getDMPNearRangeprobeID(probeID, DMP, range)
-#   return(result)
-# }
-
-# getDMPNearRangeprobeID <- function(probeID, DMP, range) {
-#   #probeID = globalVariables$annotation[order(globalVariables$annotation$chromosome, globalVariables$annotation$position),]
-#   position = which(probeID$name == DMP)
-#   positionStart = position - range
-#   positionEnd = position + range
-#   probeIDs = probeID[positionStart:positionEnd,]$name
-#   return(probeIDs)
-# }
-
 #' gets a data frame with the near range probeIDs of a DMR
 #' @description gets a data structure with the near range of a DMR
 #' @param annotation annotation data (pre loaded); the annotation from meffil
@@ -202,13 +187,14 @@ plotlyPcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotati
       if (probe == lblCpG) {
         CpGidentical <- TRUE
       }
-      if (CpGidentical) {
-        dimension <- list(label = label,
-                          values = DMPNearRangeShort[,i],
-                          range = c(0, 1),
-                          constraintrange = list(c(0.2,0.4),c(0.6,0.8)))
-      }
-      else if (markCpG) {
+      #this does not work as expected - with fractions as constraintrange the colorscale in plotly::add_trace is inactive; maybe error in plotly library?
+      # if (CpGidentical) {
+      #   dimension <- list(label = label,
+      #                     values = DMPNearRangeShort[,i],
+      #                     range = c(0, 1),
+      #                     constraintrange = list(c(0.2,0.4),c(0.6,0.8)))
+      # }
+      if (markCpG) {
         dimension <- list(label = label,
                           values = DMPNearRangeShort[,i],
                           range = c(0, 1),
