@@ -1,6 +1,6 @@
 Package: EpiVisR
 Title: A Tool for Exploratory Data Analysis and Visualisation within EWAS
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: 
     person(given = "Stefan",
            family = "Röder",

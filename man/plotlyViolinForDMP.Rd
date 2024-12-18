@@ -6,6 +6,13 @@
 \usage{
 plotlyViolinForDMP(sexFemaleValue, sexMaleValue, DMPNearRange)
 }
+\arguments{
+\item{sexFemaleValue}{value to mark for females}
+
+\item{sexMaleValue}{value to mark for males}
+
+\item{DMPNearRange}{plots a violin plot with the distribution of a certain trait contained in DMPNearRange}
+}
 \description{
 plots the violin plot for both sexes of a near range of a DMR and gives a plotly object back
 }

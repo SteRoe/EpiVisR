@@ -7,11 +7,15 @@
 getDMPNearRange(DMP, DMPNearRangeData, traitVar, mergeAttribut, range)
 }
 \arguments{
-\item{DMP}{#tbc()a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe}
+\item{DMP}{a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe}
+
+\item{DMPNearRangeData}{a data.frame containing the CpGs around a selected CpG}
+
+\item{traitVar}{a data.frame containing the real world measurements for a certain trait}
+
+\item{mergeAttribut}{the attribut from traitVar, that is used for merging with DMPNearRangeData}
 
 \item{range}{trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N}
-
-\item{probe}{#tbc  probe (in the center), that the parallel coordinate plot should show; cg number}
 }
 \value{
 data.frame

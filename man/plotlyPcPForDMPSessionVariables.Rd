@@ -10,6 +10,13 @@ plotlyPcPForDMPSessionVariables(
   DMPNearRange
 )
 }
+\arguments{
+\item{globalVariables}{package global variables}
+
+\item{sessionVariables}{package session variables}
+
+\item{DMPNearRange}{range to plot}
+}
 \description{
 plots the near range of a DMR and gives a plotly object back using session variables
 }

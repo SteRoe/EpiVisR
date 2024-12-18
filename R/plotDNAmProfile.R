@@ -77,48 +77,42 @@ getDMPNearRangeSessionVariables <- function(globalVariables, sessionVariables, r
 
 #' gets a data structure with the near range of a DMR
 #' @description gets a data structure with the near range of a DMR
-#' @param DMP #tbc()a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
-#' @param probe #tbc  probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param DMP a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param DMPNearRangeData a data.frame containing the CpGs around a selected CpG
+#' @param traitVar a data.frame containing the real world measurements for a certain trait
+#' @param mergeAttribut the attribut from traitVar, that is used for merging with DMPNearRangeData
 #' @param range trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
 #' @return data.frame
 #' @export
-#getDMPNearRange <- function(globalVariables, sessionVariables, range) {
 getDMPNearRange <- function(DMP, DMPNearRangeData, traitVar, mergeAttribut, range) {
   tryCatch({
-    #trait = sessionVariables$trait$trait
-    #DMP = sessionVariables$probe$probe
-    #trait<-gsub("adj","",trait)
-    #get trait data
-    #traitVar = traitDF(sessionVariables, globalVariables$config$mergeAttribut, globalVariables$config$sexAttribut)
-    #get DMP range data
-    #probeIDs = getDMPNearRangeprobeIDSessionVariables(globalVariables, DMP,range)
-    #probeIDs = getDMPNearRangeprobeID(globalVariables$annotation, DMP,range)
-    #DMPNearRangeData = as.data.frame(globalVariables$beta.t[,probeIDs])
     DMPNearRangeData$ID <- rownames(DMPNearRangeData)
     #merge all
     traitDMPNearRangeData <- base::merge(traitVar, DMPNearRangeData, by.x = mergeAttribut, by.y = "ID", all.x = FALSE, all.y=FALSE)
 
     rownames(traitDMPNearRangeData) = traitDMPNearRangeData$ID
-  }, error=function(err){
-    #print(paste0("unable find near range for ", DMP, " <-> ", trait, ". - ", err$message))
-    print(paste0("unable find near range for ", DMP, " <-> ", traitVar, ". - ", err$message))
+  }, error=function(e){
+    print(paste0("unable find near range for ", DMP, " <-> ", traitVar, ". - ", e$message))
   });
   return(traitDMPNearRangeData)
 }
 
 #' Plots the near range of a DMR
 #' @description plots the near range of a DMR defined inside session variables
+#' @param id id to identify against UI
+#' @param globalVariables package global variables
+#' @param sessionVariables package session variables
 plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
-  shiny::moduleServer(id, function(input, output, session) {
-    id <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
+  shiny::moduleServer(shinyId, function(input, output, session) {
+    shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
     on.exit(shiny::removeNotification(id), add = TRUE)
     reDMPNearRange <- shiny::reactive({getDMPNearRangeSessionVariables(globalVariables, sessionVariables, input$DMRWindow)})
 
     output$PlotlyPcPDMPNearRange <- plotly::renderPlotly({
       DMPNearRange = reDMPNearRange()
       if (!is.null(DMPNearRange)) {
-        id <- shiny::showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(id), add = TRUE)
+        shinyId <- shiny::showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
         plotlyPcPForDMPSessionVariables(globalVariables, sessionVariables, DMPNearRange)
       }
     })
@@ -126,15 +120,15 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
     output$PlotlyViolinDMPNearRange <- plotly::renderPlotly({
       DMPNearRange = reDMPNearRange()
       if (!is.null(DMPNearRange)) {
-        id <- shiny::showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(id), add = TRUE)
+        shinyId <- shiny::showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
         plotlyViolinForDMPSessionVariables(globalVariables, DMPNearRange)
       }
     })
 
     output$PcPDMPNearRangeData <- DT::renderDataTable({
-      id <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
-      on.exit(shiny::removeNotification(id), add = TRUE)
+      sinyId <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
       DMPNearRange = reDMPNearRange()
       DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange, globalVariables$config$baseURL_MRCEWASCatalog)
 #      colnames(DMPNearRange) <- stringr::str_to_title(colnames(DMPNearRange))
@@ -147,12 +141,14 @@ plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
 
 #' Plots the near range of a DMR
 #' @description plots the near range of a DMR and gives a plotly object back using session variables
+#' @param globalVariables package global variables
+#' @param sessionVariables package session variables
+#' @param DMPNearRange range to plot
 plotlyPcPForDMPSessionVariables <- function(globalVariables, sessionVariables, DMPNearRange) {
   probe <- sessionVariables$probe$probe
   resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
   annotation <- globalVariables$annotation
   result <- plotlyPcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation)
-  #result <- plotlyPcPForDMP(DMPNearRange, probe, P_VAL, DeltaMeth, annotation)
   return(result)
 }
 
@@ -202,7 +198,17 @@ plotlyPcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotati
           markCpG <- TRUE
         }
       }
-      if (markCpG) {
+      CpGidentical <- FALSE
+      if (probe == lblCpG) {
+        CpGidentical <- TRUE
+      }
+      if (CpGidentical) {
+        dimension <- list(label = label,
+                          values = DMPNearRangeShort[,i],
+                          range = c(0, 1),
+                          constraintrange = list(c(0.2,0.4),c(0.6,0.8)))
+      }
+      else if (markCpG) {
         dimension <- list(label = label,
                           values = DMPNearRangeShort[,i],
                           range = c(0, 1),
@@ -282,9 +288,11 @@ plotlyViolinForDMPSessionVariables <- function(globalVariables, DMPNearRange) {
 
 #' Plots the violin plot for both sexes of a near range of a DMR
 #' @description plots the violin plot for both sexes of a near range of a DMR and gives a plotly object back
+#' @param sexFemaleValue value to mark for females
+#' @param sexMaleValue value to mark for males
+#' @param DMPNearRange plots a violin plot with the distribution of a certain trait contained in DMPNearRange
 #' @export
 plotlyViolinForDMP <- function(sexFemaleValue, sexMaleValue, DMPNearRange) {
-#plotlyViolinForDMP <- function(globalVariables, DMPNearRange) {
   tryCatch({
     DMPNearRange = stats::na.omit(DMPNearRange)
     min <- min(DMPNearRange[,3])
@@ -300,24 +308,15 @@ plotlyViolinForDMP <- function(sexFemaleValue, sexMaleValue, DMPNearRange) {
     #omit x axis
     ax <- list(
       title = "Density"
-#      zeroline = FALSE,
-#      showline = FALSE,
-#      showticklabels = FALSE,
-#      showgrid = FALSE
     )
     ay <- list(
       title = colnames(DMPNearRange)[3],
       range = c(min,max)
-      #      zeroline = FALSE,
-      #      showline = FALSE,
-      #      showticklabels = FALSE,
-      #      showgrid = FALSE
     )
     plot <- plot %>% plotly::layout(xaxis = ax, yaxis = ay)
-    #    plot
     return (plot)
-  }, error=function(err){
-    print(paste0("unable to plot violin; ", err$message))
-    return(empty_plot(err$message))
+  }, error=function(e){
+    print(paste0("unable to plot violin; ", e$message))
+    return(empty_plot(e$message))
   });
 }

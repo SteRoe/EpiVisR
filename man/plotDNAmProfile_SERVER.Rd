@@ -6,6 +6,13 @@
 \usage{
 plotDNAmProfile_SERVER(id, globalVariables, sessionVariables)
 }
+\arguments{
+\item{id}{id to identify against UI}
+
+\item{globalVariables}{package global variables}
+
+\item{sessionVariables}{package session variables}
+}
 \description{
 plots the near range of a DMR defined inside session variables
 }
