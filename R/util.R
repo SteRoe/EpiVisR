@@ -244,8 +244,8 @@ loadResultFile<-function(globalVariables, sessionVariables){
 #' @noRd
 # examples getResultDataSingleTrait(globalVariables, sessionVariables, onlySignificant)
 getResultDataSingleTrait <- function(globalVariables, sessionVariables, significanceBorder = 0.05) {
-  id <- shiny::showNotification("Reading data...", duration = NULL, closeButton = FALSE)
-  on.exit(shiny::removeNotification(id), add = TRUE)
+  shinyId <- shiny::showNotification("Reading data...", duration = NULL, closeButton = FALSE)
+  on.exit(shiny::removeNotification(shinyId), add = TRUE)
   trait = sessionVariables$trait$trait
   if (shiny::isTruthy(trait)) {
 #    dat <- NULL

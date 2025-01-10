@@ -14,8 +14,8 @@ server <- function(input, output, session) {
   inputTrait_SERVER("trait", globalVariables, sessionVariables)
 
   shiny::observeEvent(input$btnSelectTrait, ignoreInit = TRUE, {
-    id <- shiny::showNotification(paste0("Selected trait: ",sessionVariables$trait$trait), duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(id), add = TRUE)
+    shinyId <- shiny::showNotification(paste0("Selected trait: ",sessionVariables$trait$trait), duration = NULL, closeButton = FALSE)
+    on.exit(shiny::removeNotification(shinyId), add = TRUE)
     #load DF from selected trait
     if (shiny::isTruthy(sessionVariables$trait$trait)) {
       print(paste0(Sys.time(), " plotting Manhattan/Volcano plots."))
@@ -27,8 +27,8 @@ server <- function(input, output, session) {
   })
 
   shiny::observeEvent(input$btnSelectProbe, ignoreInit = TRUE, {
-    id <- shiny::showNotification(paste0("Selected probe: ",sessionVariables$probe$probe), duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(id), add = TRUE)
+    shinyId <- shiny::showNotification(paste0("Selected probe: ",sessionVariables$probe$probe), duration = NULL, closeButton = FALSE)
+    on.exit(shiny::removeNotification(shinyId), add = TRUE)
     if (shiny::isTruthy(sessionVariables$probe$probe)) {
 #      shiny::updateTextInput(session, "txtSelectedProbe", value = sessionVariables$probe$probe)
 #      sessionVariables$probe$probe = input$txtSelectedProbes

@@ -10,8 +10,8 @@ plotTraitDNAm_UI <- function(id){
 
 plotTraitDNAm_SERVER <- function(id, globalVariables, sessionVariables) {
   shiny::moduleServer(id, function(input, output, session) {
-    id <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(id), add = TRUE)
+    shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
+    on.exit(shiny::removeNotification(shinyId), add = TRUE)
 
     trait = sessionVariables$trait$trait
     probe = sessionVariables$probe$probe

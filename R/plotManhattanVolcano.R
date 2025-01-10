@@ -55,8 +55,8 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
     output$plotVolcano <- plotly::renderPlotly(plotlyManhattanVolcano(globalVariables,reDFManhattanVolcano(),"V"))
 
     output$dt <- DT::renderDataTable({
-      id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
-      on.exit(shiny::removeNotification(id), add = TRUE)
+      shinyId <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
       tryCatch({
         print(paste0(Sys.time(), " render data table Manhattan/ volcano."))
         CP <- reDFManhattanVolcano()
@@ -70,8 +70,8 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
     }, server = FALSE)
 
     output$DTGeneSymbolOut <- DT::renderDataTable(server=FALSE,{
-      id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
-      on.exit(shiny::removeNotification(id), add = TRUE)
+      shinyId <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
       tryCatch({
         # Load data
         data <- getDFforPathwayAnalysis(reDFManhattanVolcano())
@@ -89,8 +89,8 @@ plotManhattanVolcano_SERVER <- function(id, globalVariables, sessionVariables) {
 
     shiny::observeEvent(plotly::event_data("plotly_click", source = "plotlyManhattan"), suspended = FALSE, {
       sessionVariables$probe$probe <- as.character(plotly::event_data("plotly_click", source = "plotlyManhattan")$key[1])
-      id <- shiny::showNotification(paste0("Selected probe: ", sessionVariables$probe$probe), duration = NULL, closeButton = FALSE)
-      on.exit(shiny::removeNotification(id), add = TRUE)
+      shinyId <- shiny::showNotification(paste0("Selected probe: ", sessionVariables$probe$probe), duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
       output$txtSelectedProbe <- shiny::renderText({sessionVariables$probe$probe})
     }, ignoreNULL = FALSE)
 

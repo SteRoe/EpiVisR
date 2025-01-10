@@ -1,6 +1,6 @@
 Package: EpiVisR
 Title: A Tool for Exploratory Data Analysis and Visualisation within EWAS
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: 
     person(given = "Stefan",
            family = "Röder",
@@ -14,6 +14,18 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: R (>= 4.1.0)
+Remotes:
+    github::Bioconductor/Rhtslib,
+    github::Bioconductor/Rsamtools,
+    github::Bioconductor/BiocGenerics,
+    github::Bioconductor/S4Vectors,
+    github::Bioconductor/IRanges,
+    github::Bioconductor/UCSC.utils,
+    github::Bioconductor/GenomeInfoDb,
+    github::Bioconductor/GenomicRanges,
+    github::Bioconductor/GenomicAlignments,
+    github::lawremi/rtracklayer,
+    github::Bioconductor/GenomicFeatures
 Imports:
     shiny (>= 1.6.0),
     shinyBS,
@@ -21,17 +33,13 @@ Imports:
     data.table (>= 1.14.0),
     meffil (>= 1.1.2),
     foreach (>= 1.5.1),
-    psych (>= 2.1.6),
     dplyr (>= 1.0.7),
     plotly (>= 4.9.4.1),
     RColorBrewer (>= 1.1-2),
-    magick (>= 2.7.2),
     config (>= 0.3.1),
     magrittr,
     stringr,
-    usethis,
     broom,
-    graphics,
     stats,
     utils,
     htmltools

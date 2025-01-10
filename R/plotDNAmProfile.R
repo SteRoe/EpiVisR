@@ -12,12 +12,30 @@ plotDNAmProfile_UI <- function(id){
       shiny::column(width = 12,
         shiny::tabsetPanel(
           shiny::tabPanel("Visualisation",
-            shiny::fluidRow(
+              shiny::fluidRow( #insert numerical overview and table headers here
+                shiny::column(width = 12,
+                  shiny::verbatimTextOutput(ns("PcPTitle"), placeholder = TRUE) #text with title here
+                )
+              ),
+              shiny::fluidRow(
               shiny::column(width = 10,
+                shiny::fluidRow(
+                  shiny::column(width = 2, #distance to start of chr
+                                shiny::verbatimTextOutput(ns("PcPTitleLeft"), placeholder = TRUE)
+                  ),
+                  shiny::column(width = 6, #table headers
+                                shiny::verbatimTextOutput(ns("PcPTitleMiddle"), placeholder = TRUE) #text with title here
+                  ),
+                  shiny::column(width = 2, #distance to end of chr
+                                shiny::verbatimTextOutput(ns("PcPTitleRight"), placeholder = TRUE)
+                  )
+                ),
+                shiny::fluidRow(
                       plotly::plotlyOutput(ns("PlotlyPcPDMPNearRange"),
                                            width = "100%",
                                            height = "800px")
-               ),
+                )
+              ),
               shiny::column(width = 2,
                       plotly::plotlyOutput(ns("PlotlyViolinDMPNearRange"),
                                            width = "100%",
@@ -32,6 +50,16 @@ plotDNAmProfile_UI <- function(id){
       )
     )
   )
+}
+
+#' @description gets length in base pairs from a certain chromosome from hg38
+#' @param chr chromosome name as string, e.g. "chr1" or "chrX"
+#' @return integer
+getChromosomeLength <- function(chr) {
+  #library(GenomicFeatures)
+  chromosomes <- getChromInfoFromUCSC("hg38")
+  chromosomes <- chromosomes[which(chromosomes$assembled == TRUE), ]
+  result <- chromosomes[which(chromosomes$chrom == chr), ]$size
 }
 
 #' gets a data frame with the near range probeIDs of a DMR
@@ -88,10 +116,58 @@ getDMPNearRange <- function(DMP, DMPNearRangeData, traitVar, mergeAttribut, rang
 #' @param globalVariables package global variables
 #' @param sessionVariables package session variables
 plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
-  shiny::moduleServer(shinyId, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(id), add = TRUE)
+    on.exit(shiny::removeNotification(shinyId), add = TRUE)
     reDMPNearRange <- shiny::reactive({getDMPNearRangeSessionVariables(globalVariables, sessionVariables, input$DMRWindow)})
+
+    output$PcPTitleLeft <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing left title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(leftTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PcPTitleMiddle <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing middle title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(middleTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PcPTitleRight <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing right title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(rightTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PcPTitle <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(titlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
 
     output$PlotlyPcPDMPNearRange <- plotly::renderPlotly({
       DMPNearRange = reDMPNearRange()
@@ -135,6 +211,117 @@ plotlyPcPForDMPSessionVariables <- function(globalVariables, sessionVariables, D
   annotation <- globalVariables$annotation
   result <- plotlyPcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation)
   return(result)
+}
+
+#' generates the left title for a PC plot
+#' @param DMPNearRange a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
+#' @param annotation annotation data (pre loaded); the annotation from meffil
+leftTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
+  tryCatch({
+    df <- resultDataSingleTrait
+    df <- resultDataSingleScenarioWithAnnotation(annotation, df)
+    DMPNearRange <- stats::na.omit(DMPNearRange)
+    DMPNearRangeShort <- DMPNearRange[,4:ncol(DMPNearRange)]
+    firstProbe <- colnames(DMPNearRangeShort)[1]
+    pos <- annotation[which(annotation$name == firstProbe),]$position
+    title = paste0(pos, " bp from chr start")
+    return(title)
+  }, warning = function(w) {
+    print(paste0("warning while printing left title for pc plot: ", w$message))
+    return(empty_plot(w$message))
+  }, error = function(e) {
+    print(paste0("unable to print left title for pc plot: ", e$message))
+    return(empty_plot(e$message))
+  });
+}
+
+#' generates the middle title for a PC plot
+#' @param DMPNearRange a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
+#' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @return text
+middleTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
+  tryCatch({
+    df <- resultDataSingleTrait
+    df <- resultDataSingleScenarioWithAnnotation(annotation, df)
+    DMPNearRange <- stats::na.omit(DMPNearRange)
+    DMPNearRangeShort <- DMPNearRange[,4:ncol(DMPNearRange)]
+    firstProbe <- colnames(DMPNearRangeShort)[1]
+    lastProbe <- colnames(DMPNearRangeShort)[ncol(DMPNearRangeShort)]
+    posStart <- annotation[which(annotation$name == firstProbe),]$position
+    posEnd <- annotation[which(annotation$name == lastProbe),]$position
+    chrF <- factor(annotation[which(annotation$name == probe),]$chromosome)
+    chrLength <- getChromosomeLength(chrF)
+    chrRange <- base::round((posEnd - posStart)*100/chrLength, digits=2) selected area comprises x% of chromosome...
+    title = base::paste0(chrRange, " % bp of chr")
+    return(title)
+  }, warning = function(w) {
+    print(paste0("warning while printing middle title for pc plot: ", w$message))
+    return(empty_plot(w$message))
+  }, error = function(e) {
+    print(paste0("unable to print middle title for pc plot: ", e$message))
+    return(empty_plot(e$message))
+  });
+}
+
+#' generates the right title for a PC plot
+#' @param DMPNearRange a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
+#' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @return text
+rightTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
+  tryCatch({
+    df <- resultDataSingleTrait
+    df <- resultDataSingleScenarioWithAnnotation(annotation, df)
+    DMPNearRange <- stats::na.omit(DMPNearRange)
+    DMPNearRangeShort <- DMPNearRange[,4:ncol(DMPNearRange)]
+    lastProbe <- colnames(DMPNearRangeShort)[ncol(DMPNearRangeShort)]
+    pos <- annotation[which(annotation$name == lastProbe),]$position
+    chrF <- factor(annotation[which(annotation$name == probe),]$chromosome)
+    chrLength <- getChromosomeLength(chrF)
+    pos <- chrLength - pos
+    title = paste0(pos, " bp from chr end")
+    return(title)
+  }, warning = function(w) {
+    print(paste0("warning while printing right title for pc plot: ", w$message))
+    return(empty_plot(w$message))
+  }, error = function(e) {
+    print(paste0("unable to print right title for pc plot: ", e$message))
+    return(empty_plot(e$message))
+  });
+}
+
+#' generates the title for a PC plot
+#' @param DMPNearRange a data.frame containing row.names(ID), IDs (ID_Kind), sex, trait and cgs around probe
+#' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
+#' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
+#' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @return text
+titlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
+  tryCatch({
+    traitName <- colnames(DMPNearRange)[3]
+    df <- resultDataSingleTrait
+    df <- resultDataSingleScenarioWithAnnotation(annotation, df)
+    gene.symbol <- df[which(df$probeID == probe),]$gene.symbol
+    chr <- df[which(df$probeID == probe),]$chromosome
+    pos <- df[which(df$probeID == probe),]$position
+    DMPNearRange <- stats::na.omit(DMPNearRange)
+    DMPNearRangeShort <- DMPNearRange[,4:ncol(DMPNearRange)]
+    P_VAL <- resultDataSingleTrait$P_VAL[resultDataSingleTrait$probeID == probe]
+    DeltaMeth <- resultDataSingleTrait$DeltaMeth[resultDataSingleTrait$probeID == probe]
+    title = paste0(traitName, " vs. ", probe, " gene.symbol: ", gene.symbol, " chromosome: ", chr, " position: ", pos, " P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth)
+    return(title)
+  }, warning = function(w) {
+    print(paste0("warning while printing title for pc plot: ", w$message))
+    return(empty_plot(w$message))
+  }, error = function(e) {
+    print(paste0("unable to print title for pc plot: ", e$message))
+    return(empty_plot(e$message))
+  });
 }
 
 #' Plots the near range of a DMR
@@ -220,7 +407,7 @@ plotlyPcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotati
                                        labelangle = 270
     )
     plot <- plot %>% plotly::layout(
-      title = paste0(traitName, " vs. ", probe, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
+      #title = paste0(traitName, " vs. ", probe, " gene.symbol: ", gene.symbol ," P_VAL: ", P_VAL, " DeltaMeth: ", DeltaMeth),
       xaxis = list(
         title = "Location",
         showgrid = F,

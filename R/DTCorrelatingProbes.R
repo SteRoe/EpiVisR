@@ -24,13 +24,13 @@ DTCorrelatingProbes_UI <- function(id){
 DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
   shiny::moduleServer(id, function(input, output, session) {
 
-    id <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(id), add = TRUE)
+    shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
+    on.exit(shiny::removeNotification(shinyId), add = TRUE)
     reDFCorrelatingProbes <- shiny::reactive({correlatingProbes(globalVariables, sessionVariables)})
 
     output$DTCorrelatingProbes <- DT::renderDataTable({
-      id <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
-      on.exit(shiny::removeNotification(id), add = TRUE)
+      shinyId <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
       tryCatch({
         print(paste0(Sys.time(), " rendering correlating data table."))
         CP <- reDFCorrelatingProbes()
@@ -81,8 +81,8 @@ DTCorrelatingProbes_SERVER <- function(id, globalVariables, sessionVariables) {
             dfList = result
   #            if (!is_null(dfList)) {
             if (!is.null(dfList)) {
-              id <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
-              on.exit(shiny::removeNotification(id), add = TRUE)
+              shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
+              on.exit(shiny::removeNotification(shinyId), add = TRUE)
               i = NULL
               foreach(i=1:length(dfList)) %do% {
                 df = as.data.frame(dfList[i])

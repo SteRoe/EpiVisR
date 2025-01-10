@@ -92,8 +92,8 @@ inputTrait_SERVER <- function(id, globalVariables, sessionVariables) {
 
 updateTraitsTable <- function(session, output, globalVariables, sessionVariables, moduleVariables) {
   print(paste0(Sys.time(), " filling TraitsTable."))
-  id <- shiny::showNotification("Filling data table...", duration = NULL, closeButton = FALSE)
-  on.exit(shiny::removeNotification(id), add = TRUE)
+  shinyId <- shiny::showNotification("Filling data table...", duration = NULL, closeButton = FALSE)
+  on.exit(shiny::removeNotification(shinyId), add = TRUE)
   print(paste0(Sys.time(), " before renderText."))
   sessionVariables$traitsDFLong <- getTraitsDFLong(globalVariables, sessionVariables)
   output$txtDataFile <- shiny::renderText(globalVariables$config$traitFileName)
@@ -112,18 +112,19 @@ updateTraitsTable <- function(session, output, globalVariables, sessionVariables
   # )
   print(paste0(Sys.time(), " getTraitsWithSummary."))
   moduleVariables$traitsWithSummary <- getTraitsWithSummary(globalVariables = globalVariables, directory = sessionVariables$folder, exludeMultiModalProbes = TRUE)
-
-  print(paste0(Sys.time(), " before renderDataTable."))
-  output$traits <- DT::renderDataTable({
-    id <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(id), add = TRUE)
-#    tableData <- moduleVariables$traitsWithSummary %>% dplyr::mutate_if(is.numeric, signif, digits = 3)
-    tableData <- moduleVariables$traitsWithSummary
-#    colnames(tableData) <- stringr::str_to_title(colnames(tableData))
-    DT::datatable(tableData, selection = "single", editable = FALSE, extensions = list("Scroller"), style = "bootstrap", class = "compact", width = "100%",
-              options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE)) %>%
-    DT::formatSignif(2:ncol(tableData), digits = 2)
-  }, server = FALSE)
+  if (!is.null(moduleVariables$traitsWithSummary)) {
+    print(paste0(Sys.time(), " before renderDataTable."))
+    output$traits <- DT::renderDataTable({
+      shinyId <- shiny::showNotification("printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
+  #    tableData <- moduleVariables$traitsWithSummary %>% dplyr::mutate_if(is.numeric, signif, digits = 3)
+      tableData <- moduleVariables$traitsWithSummary
+  #    colnames(tableData) <- stringr::str_to_title(colnames(tableData))
+      DT::datatable(tableData, selection = "single", editable = FALSE, extensions = list("Scroller"), style = "bootstrap", class = "compact", width = "100%",
+                options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE)) %>%
+      DT::formatSignif(2:ncol(tableData), digits = 2)
+    }, server = FALSE)
+  }
 }
 
 #%>% DT::formatSignif(c("MinP_Val", "MinFDR", "MaxDeltaMeth", "MaxOutlying", "MinOutlying", "MaxSkewed", "MinSkewed", "MaxClumpy", "MinClumpy", "MaxSparse", "MinSparse", "axStriated", "MinStriated", "MaxConvex", "MinConvex", "MaxSkinny", "MinSkinny", "MaxStringy", "MinStringy", "MaxMonotonic", "MinMonotonic"), digits = 5)
