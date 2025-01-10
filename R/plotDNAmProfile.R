@@ -219,6 +219,8 @@ plotlyPcPForDMPSessionVariables <- function(globalVariables, sessionVariables, D
 #' @param probe probe (in the center), that the parallel coordinate plot should show; cg number
 #' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
 #' @param annotation annotation data (pre loaded); the annotation from meffil
+#' @return text
+#' @export
 leftTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
   tryCatch({
     df <- resultDataSingleTrait
@@ -244,6 +246,7 @@ leftTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annot
 #' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
 #' @param annotation annotation data (pre loaded); the annotation from meffil
 #' @return text
+#' @export
 middleTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
   tryCatch({
     df <- resultDataSingleTrait
@@ -274,6 +277,7 @@ middleTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, ann
 #' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
 #' @param annotation annotation data (pre loaded); the annotation from meffil
 #' @return text
+#' @export
 rightTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
   tryCatch({
     df <- resultDataSingleTrait
@@ -302,6 +306,7 @@ rightTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, anno
 #' @param resultDataSingleTrait trait original methylation data as data.frame: probeID, BETA, SE, P_VAL, FDR, DeltaMeth, N
 #' @param annotation annotation data (pre loaded); the annotation from meffil
 #' @return text
+#' @export
 titlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, annotation) {
   tryCatch({
     traitName <- colnames(DMPNearRange)[3]
