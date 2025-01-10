@@ -112,96 +112,6 @@ getDMPNearRange <- function(DMP, DMPNearRangeData, traitVar, mergeAttribut, rang
 }
 
 #' Plots the near range of a DMR
-#' @description plots the near range of a DMR defined inside session variables
-#' @param id id to identify against UI
-#' @param globalVariables package global variables
-#' @param sessionVariables package session variables
-plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
-  shiny::moduleServer(id, function(input, output, session) {
-    shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
-    on.exit(shiny::removeNotification(shinyId), add = TRUE)
-    reDMPNearRange <- shiny::reactive({getDMPNearRangeSessionVariables(globalVariables, sessionVariables, input$DMRWindow)})
-
-    output$PcPTitleLeft <- shiny::renderText({
-      DMPNearRange = reDMPNearRange()
-      if (!is.null(DMPNearRange)) {
-        shinyId <- shiny::showNotification("Printing left title for PCPlot...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(shinyId), add = TRUE)
-        probe <- sessionVariables$probe$probe
-        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
-        annotation <- globalVariables$annotation
-        return(leftTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
-      }
-    })
-
-    output$PcPTitleMiddle <- shiny::renderText({
-      DMPNearRange = reDMPNearRange()
-      if (!is.null(DMPNearRange)) {
-        shinyId <- shiny::showNotification("Printing middle title for PCPlot...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(shinyId), add = TRUE)
-        probe <- sessionVariables$probe$probe
-        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
-        annotation <- globalVariables$annotation
-        return(middleTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
-      }
-    })
-
-    output$PcPTitleRight <- shiny::renderText({
-      DMPNearRange = reDMPNearRange()
-      if (!is.null(DMPNearRange)) {
-        shinyId <- shiny::showNotification("Printing right title for PCPlot...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(shinyId), add = TRUE)
-        probe <- sessionVariables$probe$probe
-        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
-        annotation <- globalVariables$annotation
-        return(rightTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
-      }
-    })
-
-    output$PcPTitle <- shiny::renderText({
-      DMPNearRange = reDMPNearRange()
-      if (!is.null(DMPNearRange)) {
-        shinyId <- shiny::showNotification("Printing title for PCPlot...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(shinyId), add = TRUE)
-        probe <- sessionVariables$probe$probe
-        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
-        annotation <- globalVariables$annotation
-        return(titlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
-      }
-    })
-
-    output$PlotlyPcPDMPNearRange <- plotly::renderPlotly({
-      DMPNearRange = reDMPNearRange()
-      if (!is.null(DMPNearRange)) {
-        shinyId <- shiny::showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(shinyId), add = TRUE)
-        plotlyPcPForDMPSessionVariables(globalVariables, sessionVariables, DMPNearRange)
-      }
-    })
-
-    output$PlotlyViolinDMPNearRange <- plotly::renderPlotly({
-      DMPNearRange = reDMPNearRange()
-      if (!is.null(DMPNearRange)) {
-        shinyId <- shiny::showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
-        on.exit(shiny::removeNotification(shinyId), add = TRUE)
-        plotlyViolinForDMPSessionVariables(globalVariables, DMPNearRange)
-      }
-    })
-
-    output$PcPDMPNearRangeData <- DT::renderDataTable({
-      sinyId <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
-      on.exit(shiny::removeNotification(shinyId), add = TRUE)
-      DMPNearRange = reDMPNearRange()
-      DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange, globalVariables$config$baseURL_MRCEWASCatalog)
-#      colnames(DMPNearRange) <- stringr::str_to_title(colnames(DMPNearRange))
-      DT::datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
-                options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
-      DT::formatSignif(3:ncol(DMPNearRange), digits = 2)
-    }, server = FALSE, escape = FALSE)
-  })
-}
-
-#' Plots the near range of a DMR
 #' @description plots the near range of a DMR and gives a plotly object back using session variables
 #' @param globalVariables package global variables
 #' @param sessionVariables package session variables
@@ -498,4 +408,94 @@ plotlyViolinForDMP <- function(sexFemaleValue, sexMaleValue, DMPNearRange) {
     print(paste0("unable to plot violin; ", e$message))
     return(empty_plot(e$message))
   });
+}
+
+#' Plots the near range of a DMR
+#' @description plots the near range of a DMR defined inside session variables
+#' @param id id to identify against UI
+#' @param globalVariables package global variables
+#' @param sessionVariables package session variables
+plotDNAmProfile_SERVER <- function(id, globalVariables, sessionVariables) {
+  shiny::moduleServer(id, function(input, output, session) {
+    shinyId <- shiny::showNotification("Plotting data...", duration = NULL, closeButton = FALSE)
+    on.exit(shiny::removeNotification(shinyId), add = TRUE)
+    reDMPNearRange <- shiny::reactive({getDMPNearRangeSessionVariables(globalVariables, sessionVariables, input$DMRWindow)})
+
+    output$PcPTitleLeft <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing left title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(leftTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PcPTitleMiddle <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing middle title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(middleTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PcPTitleRight <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing right title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(rightTitlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PcPTitle <- shiny::renderText({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Printing title for PCPlot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        probe <- sessionVariables$probe$probe
+        resultDataSingleTrait <- sessionVariables$resultDataSingleTrait
+        annotation <- globalVariables$annotation
+        return(titlePcPForDMP(DMPNearRange, probe, resultDataSingleTrait, annotation))
+      }
+    })
+
+    output$PlotlyPcPDMPNearRange <- plotly::renderPlotly({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Plotting near DMP data...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        plotlyPcPForDMPSessionVariables(globalVariables, sessionVariables, DMPNearRange)
+      }
+    })
+
+    output$PlotlyViolinDMPNearRange <- plotly::renderPlotly({
+      DMPNearRange = reDMPNearRange()
+      if (!is.null(DMPNearRange)) {
+        shinyId <- shiny::showNotification("Plotting vertical violin plot...", duration = NULL, closeButton = FALSE)
+        on.exit(shiny::removeNotification(shinyId), add = TRUE)
+        plotlyViolinForDMPSessionVariables(globalVariables, DMPNearRange)
+      }
+    })
+
+    output$PcPDMPNearRangeData <- DT::renderDataTable({
+      sinyId <- shiny::showNotification("Printing data...", duration = NULL, closeButton = FALSE)
+      on.exit(shiny::removeNotification(shinyId), add = TRUE)
+      DMPNearRange = reDMPNearRange()
+      DMPNearRange <- addLinkToMRCEWASCatalogToHeader(DMPNearRange, globalVariables$config$baseURL_MRCEWASCatalog)
+#      colnames(DMPNearRange) <- stringr::str_to_title(colnames(DMPNearRange))
+      DT::datatable(DMPNearRange, escape = F, extensions = c('Scroller', 'Buttons'), style = "bootstrap", class = "compact", width = "100%",
+                options = list(pageLength = 10, deferRender = TRUE, scrollY = 300, scrollX = TRUE, scroller = TRUE, dom = 'ftBS', buttons = c('copy', 'csv'))) %>%
+      DT::formatSignif(3:ncol(DMPNearRange), digits = 2)
+    }, server = FALSE, escape = FALSE)
+  })
 }
