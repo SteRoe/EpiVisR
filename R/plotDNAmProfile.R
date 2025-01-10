@@ -52,6 +52,7 @@ plotDNAmProfile_UI <- function(id){
   )
 }
 
+#' gets length in base pairs from a certain chromosome from hg38
 #' @description gets length in base pairs from a certain chromosome from hg38
 #' @param chr chromosome name as string, e.g. "chr1" or "chrX"
 #' @return integer
@@ -255,7 +256,7 @@ middleTitlePcPForDMP <- function(DMPNearRange, probe, resultDataSingleTrait, ann
     posEnd <- annotation[which(annotation$name == lastProbe),]$position
     chrF <- factor(annotation[which(annotation$name == probe),]$chromosome)
     chrLength <- getChromosomeLength(chrF)
-    chrRange <- base::round((posEnd - posStart)*100/chrLength, digits=2) selected area comprises x% of chromosome...
+    chrRange <- base::round((posEnd - posStart)*100/chrLength, digits = 2) #selected area comprises x% of chromosome...
     title = base::paste0(chrRange, " % bp of chr")
     return(title)
   }, warning = function(w) {
